@@ -1,0 +1,370 @@
+Fundamentals of
+Secure Software
+Engineering
+Winter term 2025/26
+Code Review, Clean Code, Test Driven
+Development
+Dr. Sergej Dechand / Dr. Christian Tiefenau
+🐛 Vulnerability of the Day − Uncontrolled Format String − OS Command Injection 👀 Code Review − Git push, git merge − Variables 🧹 Clean Code − Code smells − Refactoring − Antipatterns to avoid 🔬 Static Analysis
+2
+Outline today
+https://www.adac.de/rund-ums-fahrzeug/autokatalog/marken-modelle/mazda/mazda-3/
++ =
++
+VOTD | Can you guess?
+3
+Podcasts are Dangerous
+4
+VotD | Uncontrolled Format String
+Uncontrolled Format Strings | Detailed
+5
+User input as format string → memory read/write primitive
+🐛 Problem
+− User-controlled input is passed directly as format
+string to printf-family functions printf(str)
+− Attackers can use format specifiers (%x, %n) to read
+memory or write arbitrary values
+• %x prints hex, %n writes number of bytes printed so far
+to address provided
+🛡 Mitigations
+− Set format string explicitly, e.g. printf("%s", str)
+− In cases where you cannot avoid loading format strings
+from outside, use sanitization (best: whitelisting)
+− Compiler warnings: -Wformat-security
+char *str = user_input;
+printf(str);
+// no arguments → stack
+// printf("%n", &a) prints addr
+> %x.%x.%x.%x
+< bffff7a0.0.252.804a008
+// write AAAA into address
+> AAAA%08x.%08x.%08x.%n
+// Writes into address
+🎯 Root problem
+• Unsanitized input is forwarded to an OS command
+• Similar to SQL injection and Path Traversal. Often,
+string concatenation is used to issue commands
+not anticipated by the programmer
+🛡 Mitigations
+• Try restricting the OS call to a single command
+• In Java, for instance, use ProcessBuilder API
+• Generally avoid OS calls whenever possible
+• Ideally restrict inputs to those command via a whitelist
+🔗 Also known as CWE-78: Improper Neutralization of
+Special Elements used OS Command ('OS Command Injection')
+6
+OS Command Injection | Details
+Shell metacharacters turn data into commands
+// C - vulnerable
+char cmd[256];
+sprintf(cmd, "ping %s", inp);
+system(cmd);
+// Java - vulnerable
+Runtime.getRuntime().exec("ping " + inp);
+// Input: 8.8.8.8; rm -rf /
+// Executes: ping 8.8.8.8; rm -rf /
+VotD | OS Command Injection
+7
+OS Command Injection
+8
+Real-world Vulnerability
+http://www.apacheweek.com/issues/02-03-22#security
+CVE-2002-0061
+9
+Requirements
+and Use Cases
+Architecture
+And Design Test Plans Code Test and
+Test Results
+Feedback from
+the Field
+Risk-Based
+Security Tests
+Code Review Security and
+Penetration Testing
+Security
+Operations
+External
+Review
+Risk Analysis
+Security
+Requirements
+Abuse
+Cases Risk Analysis
+Code Reviews
+10
+Is this a code review?
+Push Push Done
+11
+Shared understanding beats solo shipping
+Why do Code Reviews at all?
+12
+Higher Complexity | What are the elements of Merge Requests?
+Variables You Can Adjust in Code Reviews
+● Online / Offline
+● Pair / Group
+● Asynchronous / Synchronous
+● During Coding / After Coding
+13
+Find what works for your team and context
+Best Practices
+● Size (less than 200 changes increases participation a lot)
+● Adherence to conventions
+● Constructive feedback, good communication
+● Prioritization
+● Generally: Make it easy for the others
+14
+15
+🧹 Clean Code
+Let’s talk about Code
+16
+17
+Clean Code
+• Clean Code is intuitively understandable
+text
+• Not necessarily code, can be YAML, DBs, etc..
+• 80% of the life cycle of a project is
+maintenance, feature expansion and bug
+fixing.
+•It’s not easy and requires experience.
+• This experience can be learned by doing.
+18
+• “What? How can code ‘smell’? - Well it doesn’t have a nose… but it
+definitely can stink!” - refactoring.guru
+• Code Smells are patterns that make code less readable.
+Code Smells
+19
+Refactorings
+•We have dirty code, we want clean Code.
+•A refactoring is a structure changing, behaviour preserving process.
+20
+My Top 3 Antipatterns
+● Long Method
+➢ Extract Method
+● Improper Naming
+➢ Rename (duh)
+● Insufficient Encapsulation
+➢ Extract Method
+➢ Move Method
+21
+Security Impact
+● Increased readability and changeability should increase security, as
+bugs can be easier to find and fix
+… right?
+● Studies show code review improves quality and knowledge sharing,
+but isolating the security impact specifically is hard to measure
+○ Industry consensus is strong though
+○ Very active field of research!
+22
+23
+Test Driven Development
+● The idea of TDD is to convert requirements to test cases and force the
+requirements to be fulfilled by writing the tests first.
+● Two approaches
+− Chicago / Detroit TDD (bottom up)
+− London TDD (top down)
+24
+Test Driven Development
+•Do not write more than necessary to
+make the test pass
+•If you don’t know what to implement
+next, look at the user story
+prioritization (what is the next most
+important thing to do?)
+• Plan ahead and break the tasks up if
+necessary.
+25
+Process
+Rules
+1. Do not write production code that is more specific than the tests.
+• Tests makes the test suite more specific.
+• Production code makes the production app more general.
+2. Don’t go for the goal. Avoid the central behaviour as long as
+possible.
+3. Do not bring TDD to work if you’re not good at TDD.
+• Trying to improve code by writing tests is never wrong. Just don’t force your
+team until you’re sure of what you’re doing.
+26
+Effects
+● % Test coverage
+● If you break something, you’ll know it.
+● More modular projects
+● Examples of how to use code snippets
+● These all should (in theory) result in faster development speed
+later in the development cycle
+27
+When not to Use
+● If you’re in a professional setting and you’re not an expert.
+● If you’re doing teamwork and you’re not an expert.
+● Otherwise? Go for it.
+28
+When to Use
+● Small projects
+● Personal projects without a strict deadline
+● If the whole team are experts, every project
+29
+Security Impact
+● Functionality tests exist: Bugs are easier to fix
+● If done well, tests also function as code snippets on how to use your
+functions, and API misuse may happen less
+● Some security requirements can be translated into tests
+○ Although you have to think about many edge cases
+● Some kind of bugs are never created in the first place
+30
+Exercises
+• 2 Minute TDD
+• Katas
+• Program a calculator
+• Program a calculator that uses strings (terms) as inputs
+• A program that converts ints to roman numerals
+• A program that converts roman numerals to ints
+• Refactoring Katas
+• Great to learn how to write tests in an existing code base without tests
+31
+Automated Security Reviews
+32
+Code Analysis
+Challenge | Code Reviews do not Scale
+🐛 Proactive Security Testing
+− Remember our test planning approach and the “bag of tricks” in the bottom up?
+− Goal is to avoid as many mistakes as possible
+− Aren’t there specific rules we could use for automation?
+👀 Two main Approaches
+− Whitebox Analysis: Scan the source code for issues
+− Blackbox Analysis: Execute program and try to attack
+33
+34
+Back to our example from the first lecture, can we find this one automatically
+Challenge | Is this code secure?
+🧼 Input sanitization (deprecated, experts only)
+🏗 Prepared Statements (recommended)
+🪲 Injection Types
+• Command line injections, NoSQL injections, etc
+35 https://cwe.mitre.org/data/definitions/89.html
+Protection requires Input Sanitization and Neutralization (CWE 89)
+Can we check whether this was done correctly?
+36
+🔬 Static Analysis
+aka Static Application Security Testing (SAST)
+Static Application Security Testing (SAST)
+📘 Definition
+Static Analysis Security Testing (SAST) analyses the code for problematic patterns without
+executing the code. The goal is to avoid security issues and bad coding patterns.
+✅ What it finds
+○ Code Injections (unvalidated and unsanitized inputs)
+○ Usage of dangerous functions
+○ Hard-coded credentials
+○ …
+Use Cases
+○ Early in the SDLC, ideally in the IDE but also part of the build pipeline
+○ Typically on source code level, but some take Bytecode
+37
+Grammarly, but for security
+Tools
+○ grep -n -A 2 "createQuery.*(" File.java | grep -B 3 "\+"
+○ Semgrep, Joern, CodeQL (Github / VSCode), SonarQube, IntelliJ, etc
+38
+Requirements
+and Use Cases
+Architecture
+And Design Test Plans Code Test and
+Test Results
+Feedback from
+the Field
+Risk-Based
+Security Tests
+Code Review Security and
+Penetration Testing
+Security
+Operations
+External
+Review
+Risk Analysis
+Security
+Requirements
+Abuse
+Cases Static Analysis
+Depending on the use case, part of code and testing strategy
+Static Analysis
+Outlook | How does Static Analysis Work
+📘 How it Works
+SAST translates the code into graph representations, e.g. Control Flow Graphs (CFGs).
+Taint analysis then attempts to find bad and dangerous patterns
+🧠 Core Elements of Taint Analysis [1]
+● Sources: Input with potentially dangerous data (e.g., user inputs, HTTP parameters)
+● Sinks: Critical functions for successful attacks (e.g., SQL, OS Commands)
+● Propagation: Tracking tainted ("contaminated") data through the code
+● Sanitizer: Cleansing functions that remove the taint
+39
+Search in code graphs for bad patterns and perform taint analysis
+[1]: Livshits et al. (2005): Finding security vulnerabilities in Java applications with static analysis. Proceedings of the 14th USENIX Security Symposium
+[2]: Demystifying Taint Analysis in Semgrep as a simplified explanation
+SAST | Limitations
+40
+False negatives lead to missed issues in the code (Missed the Fire)
+public ResultSet findUserInsecure(String username) throws SQLException {
+ Query q = new Query();
+ String sql = q.getUserLookup(username);
+ return DatabaseUtils.query(conn, sql);
+}
+class Query {
+ public String getUserLookup(String user) {
+ return "SELECT * FROM users WHERE username = '" + user + "'";
+ }
+}
+class DatabaseUtils {
+ public static ResultSet query(Connection conn, String sql) throws SQLException {
+ return conn.createStatement().executeQuery(sql);
+ }
+}
+SAST | Limitations
+41
+False positives where we show potential issues but these are benign (Crying Wolf)
+public ResultSet findUserWithRealSanitize(String username) throws SQLException {
+ String sanitized = username.replaceAll("[^a-zA-Z0-9]", ""); // Only allows alphanumeric
+ String query = "SELECT * FROM users WHERE username = '" + sanitized + "'";
+ return this.conn.createStatement().executeQuery(query);
+}
+SAST | Trade-Offs
+42
+The inevitable trade-off between false positives and false negatives
+📘 Note
+Each analysis tool balances false positives and false negatives. Depending on the tool, this is either
+determined by the vendor or left to the user via configuration settings.
+→ Many complex, undecidable, or unsolvable problems from theoretical computer science, such as Rice's
+Theorem, the Halting Problem, etc. [1]
+⚖ Trade-Off Matrix
+⚠ False Positive 🔥 False Negative
+Meaning Alert without a real error Vulnerability overlooked
+Risk Desensitization / Loss of trust False sense of security
+Economic Damage Requires effort Errors are found too late
+Mnemonic Crying Wolf Missed the Fire
+[1]: William Landi: Undecidability of static analysis (ACM Letters on Programming Languages and Systems)]
+(https://doi.org/10.1145/161494.161501)
+From Theory to Practice
+43
+Covered four key practices today
+− Code Reviews - catching issues through human insight
+− Clean Code - making code readable and maintainable
+− TDD: building quality in from the start
+− Static Analysis - automated security checking
+Let's see how they work together...
+Key Takeaways | Putting it all together (Simplified)
+44
+https://owasp.org/www-community/Source_Code_Analysis_Tools
+https://owasp.org/www-community/controls/Static_Code_Analysis
+Question
+45
+Does ChatGPT perform code analysis? Would it be static or dynamic?
+46
+• Brian Chess and Jacob West, Secure Programming with Static Analysis, Addison-Wesley, 2007.
+• Michael Howard, “A Process for Performing Security Code Reviews.” IEEE Security & Privacy, July 2006.
+• Eoin Keary et. al., OWASP Code Review Guide 1.1,
+http://www.owasp.org/index.php/Category:OWASP_Code_Review_Project, 2008.
+• Jason Cohen, Best Kept Secrets of Peer Code Review
+http://smartbear.com/SmartBear/media/pdfs/best-kept-secrets-of-peer-code-review.pdf, 2006.
+• IEEE Standard for Software Reviews and Audits," in IEEE Std 1028-2008 , Aug. 2008. DOI:
+10.1109/IEEESTD.2008.4601584
+• Khedker, Uday et al., Data flow analysis: theory and practice, 2009
+47
+References & Further Readings

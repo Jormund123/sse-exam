@@ -1,0 +1,1175 @@
+Secure Software Engineering
+Winterterm 2024/25
+Architectural Risk Analysis & Distrustful Decomposition
+Dr. Christian Tiefenau
+Outline
+• Vulnerability of the Day
+Cross-site scripting
+• Risk analysis
+Threat Modeling
+Determine, Rate, Countermeasures
+Data Flow Diagrams and Trust Boundaries
+• Distrustful Decomposition
+Principle of Least Privilege
+Defense in Depth
+Permissions
+IPC
+Vulnerability of the Day
+Cross-site Scripting (XSS)
+3
+XSS - Setting
+• Webpage includes data in dynamic content and is sent to a web user
+• Goal:
+https://www.example.com/?name=JohnDoe
+4
+>Server Output: “Hello JohnDoe”
+<?php
+//Get user input
+if($_GET[ 'name' ] != NULL ) {
+//Create Dynamic Content
+echo '<pre>Hello ' . $_GET[ 'name' ] . '</pre>';
+}
+?>
+XSS - Example
+• Inject code such that this code is executed by the clients browser as
+valid HTML / JavaScript code
+• Injected Code stored in the parameter ?name=<injectedCode>
+Link with this parameter can be distributed
+5
+https://www.example.com/?name=<script>alert('Pwnd');</script>
+>What’s your name?: <script>alert('Pwnd');</script>
+JavaScript
+>What’s your name?: <form>Login:<input type="text" name="firstname"
+value="Mickey"> <br> PW <input type="text" name="lastname"
+value="Mouse"><br> <input type="submit" value="Submit"></form>
+HTML + JavaScript Create a Login form and send data to another server
+Different kinds of XSS
+• Reflective:
+• Injected input is sent back to the client, e.g., using GET parameters in a URL
+the victim got from an attacker
+• Persistent/Stored:
+• Injected input is sent stored on server side and delivered in future request,
+e.g. guest books or user profiles
+• DOM-based / local:
+• Exploit is interpreted/executed on the client machine
+• No server interaction needed
+• Some other attack vector needed, e.g. malicious plugin with access to
+browser content
+6
+Mitigations
+• Escaping “bad” characters via built-in function (no self-made regex)
+7
+<?php
+//Get user input
+if($_GET[ 'name' ] != NULL ) {
+//Escape Special Characters
+$name = htmlspecialchars( $_GET[ 'name' ] );
+//Create Dynamic Content
+echo "<pre>Hello ${name}</pre>";
+}
+?>
+Current Example - CVE-2025-55200
+8
+CVE xxxx-yyyyy
+• Common Vulnerabilities and Exposures (~ 221k)
+• Managed and hosted by MITRE
+• https://cve.mitre.org/
+• We already referred to it every lecture
+• E.g., CVE-2011-1153
+9
+Listed as CWE-79
+10
+https://cwe.mitre.org/data/definitions/79.html
+Architectural Risk Analysis &
+Distrustful Decomposition
+11
+12
+Requirements
+and Use Cases
+Architecture
+And Design Test Plans Code Test and
+Test Results
+Feedback from
+the Field
+Risk Analysis
+Security
+Requirements
+Misuse/Abuse
+Cases
+Different View on your System
+• Previously: Abuse & Misuse Cases:
+• Start with the functionality
+• p(exploit), p(vulnerability)
+• Start with what to protect
+• Assets
+• Domain, domain, domain
+• Goals -> High-level Risks -> Indicators -> Tests
+• Today: start with what to protect against
+• Threats, attacks
+13
+Back in 2002…
+14
+• Windows XP was cutting edge technology (and ran on a tablet!)
+• But also…
+2002 – Bill Gates on Trustworthy Computing
+From: Bill Gates
+Sent: Tuesday, January 15, 2002 5:22 PM
+To: Microsoft and Subsidiaries: All FTE
+Subject: Trustworthy computing
+Every few years I have sent out a memo talking about the
+highest priority for Microsoft. Two years ago, it was the
+kickoff of our .NET strategy. Before that, it was several
+memos about the importance of the Internet to our future
+and the ways we could make the Internet truly useful for
+people. Over the last year it has become clear that
+ensuring .NET is a platform for Trustworthy Computing is
+more important than any other part of our work. If we
+don't do this, people simply won't be willing — or able —
+to take advantage of all the other great work we do. ...
+15 https://www.wired.com/2002/01/bill-gates-trustworthy-computing/
+• … Bill Gates informed about the importance of Trustworthy Computing 
+Trustworthy Computing Initiative
+• The Microsoft initiative really changed the way in which people engineered software
+• First big company known to adopt dedicated secure software engineering practices
+• Over the years, Microsoft also researched and developed many appropriate methodologies
+16
+• Create Data Flow Diagram
+• Identify Threats for each element
+• Discuss, Refine & Rate Threats
+• Provide Mitigation for Threats
+• Create Threat Model Report
+Threat Modeling
+Tool
+STRIDE
+• We‘ll see some of them
+in this lecture
+Influences on todays software
+• Also influenced current standards and certifications:
+• IT-Sicherheitsgesetz 2.0 (https://www.bsi.bund.de/EN/Das-BSI/Auftrag/Gesetze-und-Verordungen/IT-SiG/2-0/it_sig-2-0_node.html)
+• “KRITIS” companies have to report cyber attacks
+• Develop and define security processes and standards
+• Will be certified and controlled by BSI
+• Also new EU directive (“NIS-Richtlinie”)
+• BSI Grundschutz (https://www.bsi.bund.de/EN/Themen/Unternehmen-und-Organisationen/Standards-und-Zertifizierung/IT-Grundschutz/it-grundschutz_node.html)
+• BSI already provides guidelines for basic security
+• Contains also guidelines for threat modeling and risk analysis
+• Certifications, e.g., ISO 27000 family for ISMS (https://www.iso.org/standard/iso-iec-27000-family)
+• Focuses on holistic approach
+• Threat Modeling is part of this process
+17
+Secure Development Lifecycle – Phases and Costs
+18
+Cost to fix a vulnerability
+30x
+20x
+10x
+5x
+Requirements
+and Use Cases
+Architecture
+And Design Test Plans Code Test and
+Test Results
+Feedback from
+the Field
+• Detecting vulnerabilities early on helps to reduce costs.
+Architectural Risk Analysis
+• Structured, repeatable approach to identify potential security
+flaws in software or systems at design time
+• Teamwork (!)
+• Modeling aspects of the system for the purpose of finding
+threats
+• “Threat Modeling”
+• Discuss security risk once most of the architecture is settled
+• Motivation: a few good early decisions go a long way, e.g.,
+• Incorporating encryption at the right places
+• Authentication & access control concerns
+• Choice of technologies used
+19
+Architectural Risk Analysis
+• Answer questions like
+• What are potential threats?
+• What are my assets? (also)
+• Who would / can attack me?
+• Emphasis of design flaws over code-level vulnerabilities
+• Must-haves vs. Nice-to-haves at the design level
+• Starting point for documentation and further security actions during the
+development
+20
+Threat Modeling – General Approach
+• Determine threats
+• Identify entry/exit points
+• Identify trust boundaries
+• Identify threats
+• Rate threats
+• Identify most probable threats
+• Identify most critical threats
+• Determine countermeasures
+• Identify solutions to mitigate threats
+• Document non-mitigated threats
+21
+Data Flow Diagram Primitives
+• External interactors
+e.g. clients, other systems, dependencies
+• Process
+Architecture-centered functionality
+e.g. dispatcher, input validator
+• Datastore
+e.g. database, file system
+• Data flow
+Domain-specific explanation of data
+e.g. “Login Requests”
+22
+Process
+Datastore
+Data
+Ext. Entity
+Threat Modeling – Data Flow Diagrams
+23
+Web Server SQL
+Database
+Page Request
+Query for Webpage
+Content
+Webpage Content
+Browser
+External Entity
+Process
+Data Store
+Data Flow
+Trust Boundaries
+• Draw trust Boundaries: data from one party to another is not trusted
+• Untrusted examples
+• Data from a web browser (e.g. external interactor)
+• Data from one machine to another
+• Trusted examples
+• Data from another process within the same runtime environment
+• Data from the database
+24
+Trust Boundary
+Threat Modeling – Data Flow Diagrams
+25
+Web Server SQL
+Database
+Page Request
+Query for Webpage
+Content
+Webpage Content
+Browser
+External Entity
+Process
+Data Store
+Data Flow
+Trust Boundary
+• Trust boundary here, because we‘re not able to control the things
+that happen between a browser and our server
+Threat Modeling – Data Flow Diagrams
+26
+Web Server SQL
+Database
+Page Request
+Query for Webpage
+Content
+Webpage Content
+Browser
+Naming is HTTP Request
+Important
+Good Starting Point
+for Finding Threats
+• Use names that are as specific as possible.
+• HTTP Request could be anything (GET,POST,…)
+Data Flow Diagrams – Example Scenario
+27
+External Entity
+Process
+Data Store
+1. What is the scenario?
+2. Is something missing?
+3. Suggest trust boundaries.
+Data Flow Diagrams – Example Scenario
+28
+1. What is the scenario?
+2. Is something missing?
+3. Suggest trust boundaries.
+Threat Modeling
+STRIDE per Element
+29
+Recap: Threat Categories - STRIDE
+30
+“Pretending to be something or someone other than yourself.”
+Spoofing
+“Allowing someone to do something they’re not authorized to do.”
+Elevation of Privilege
+“Absorbing resources needed to provide service.”
+Denial of Service
+“Providing information to someone not authorized to see it.”
+Information Disclosure
+“Claiming that you didn’t do something, or were not responsible.”
+Repudiation
+“Modifying something on disk, on a network, or in memory.”
+Tampering
+[Shostack, A. (2014). Threat modeling : designing for security., Indianapolis, Ind. : Wiley.]
+STRIDE per Element
+31
+• Performed against each and every component
+• Pro‘s:
+• Systematic coverage
+• Independent analysis
+• Relating threats to components
+• Cons:
+• Time consuming
+• Misses interaction-level threats
+• Duplicate threats if they are the same for different components
+STRIDE per Element
+32
+Component S T R I D E
+External Entity
+Process
+Data Store
+Data Flow
+Web
+Server
+SQL
+Database
+Browser
+• Analysis example for our scenario. Result can look like this:
+Data Flow Diagrams – Mapping Threats
+33
+Spoofing User
+Browser Identity
+Task:
+1. Name some threats based on
+“STRIDE per element”.
+2. Discuss the threats. Are they applicable?
+S T R I D E
+User Browser
+Library
+Management
+System
+Web Servlet
+Logging
+Database
+Information Disclosure
+of Logs
+Tampering on
+Web Servlet
+Repudiation
+STRIDE per interaction
+34
+[Shostack, A. (2014). Threat modeling : designing for security., Indianapolis, Ind. : Wiley.]
+• Performed against each interaction
+• Pro‘s:
+• Focuses on real attack paths (across
+interactions instead of isolated components)
+• Less duplication
+• Less time consuming
+• Cons:
+• Misses threats on component level (e.g.,
+vulnerabilities)
+• Achieving full coverage is hard
+MS Threat Modeling Tool | Tool of your choice
+• Architectural risk analysis tool
+• Originally built on top of Visio
+• 2014 and 2016 versions
+largely updated
+• Follows STRIDE concept
+• Provides Modeling & Analysis View
+• You can use that in the exercises
+• But www.draw.io (or similar tools) work too
+35
+https://blogs.microsoft.com/microsoftsecure/2015/10/07/whats-new-with-microsoft-threat-modeling-tool-2016/
+or
+https://learn.microsoft.com/en-us/azure/security/develop/threat-modeling-tool
+36
+Analysis View
+List of threats
+Detailed description
+Analysis View
+• Generate potential threats that must be mitigated
+• Based on components, their types and their connections
+• Forces you to describe mitigations
+• Helps you to record assumptions
+• Go directly to file a bug
+• Threats are particularly bad when…
+• Flows cross boundaries
+37
+Threat Models != Architecture
+• Threat models are specifically about modeling security
+• We do not create our architecture with them
+• Architecture diagrams depict subsystems responsibility
+• What component exists and what is each one responsible for?
+• How does the system work?
+• Threat Model is security focused
+• Based on data flows
+• Naming and characterizing the data that will be transported from one part of the system to another
+• Iteratively mitigating risks the tool tells us about
+• How could the system be attacked
+• Big architectures may end up being one big bubble
+• It‘s not sufficient to look at modules on their own
+• Small features in the architecture might constitute an entire process in a threat model
+38
+Tip: Naming Is Huge
+• The flow names should be meaningful
+• Bad: “HTTP”, “Request”
+• Good: “Blog Content”, “Scrape Requests”
+• Name your trust boundaries
+• Bad: “Machine boundary”, “Database boundary”
+• Good: “External Partner API Boundary“, “Identity Provider Boundary“
+• Processes & external interactors
+• Bad: “server”
+• Good: “feedly.com”
+• Ultimate test: outsiders should understand your system without much
+other info than the data flow diagram
+39
+More Tips for Threat Modeling
+• Be honest with the process
+• Make sure the model represents reality
+• Consider all types of threats –
+code-level vulnerabilities are just a “for example”
+• As with all modeling, use appropriate complexity
+• Overly-simplified?
+• Departs from reality
+• You get exactly what you put into it – no new knowledge
+• Overly-complicated?
+• Too much to analyze
+• “Check it off the list” syndrome
+• Test your model
+Think of a specific security concern, then try to see where it fits in your threat model
+40
+Architectural Risk Analysis &
+Distrustful Decomposition
+41
+Key Principles
+• Principle of Least privilege
+• Defense in Depth
+• Obviously No Vulnerabilities
+• Assuming the attacker gets past that other defense, how do we:
+• Protect the inner parts of the system?
+• Limit the capabilities of the attacker?
+• Believe our critical subsystems are secure?
+42
+Permissions Challenges
+• When programs are executed, the running code has permissions
+• via executing user, setuid, setgid, Java security manager, etc.
+• Many programs need elevated (root) permissions to function
+• Web servers: listen & respond on HTTP, e.g. port 80
+• Email servers: listen & respond on SMTP, e.g. port 25
+• Browser plugins: website access, history access, …
+• Mobile apps: listening for text messages, accessing geo location
+• What permissions are truly needed, and when?
+• Solution: design your architecture around your permissions needs
+43
+Distrustful Decomposition
+• Decompose the system into separate processes with separate permissions
+• i.e. fork(), NOT threads. Why?
+• Threads still have shared memory!
+• Communicate via inter-process communication (see next slides)
+• Each operating-system process distrusts the other
+• i.e. validate the input from the other process
+• i.e. re-check credentials and integrity mechanisms
+• Simplify the root-level subsystems to an extreme extent
+• Outcomes
+• Complex code gets sandboxed -> reduce impact of an exploit
+• More security checks get incorporated throughout the code
+• Incorporate distrust at the architecture level
+44
+IPC: Simple Techniques
+• Files
+• Simplest for most developers, but…
+• Files have no structure to them -> complexity in inputs!
+• File parsers are themselves among the most vulnerable components!
+• Locking gets tough. It must be respected (concurrency challenges ->
+complexity!!)
+• Signals
+• Simple messaging, sometimes allow data to be transferred (e.g. Android)
+• Pre-defined by OS (Unix has ~30 of these)
+• e.g. SIGINT, SIGTERM, SIGKILL, SIGSEGV, SIGPOLL
+45
+IPC: More Techniques
+• Clipboard
+• Can set and get clipboard programmatically
+• Users don’t like you messing with this
+• Also can be a security risk in itself!
+• Named pipes a.k.a. a FIFO buffer
+• Define a “virtual file” that one process can write to and another process reads
+from
+• Supported at the OS (file system) level
+• BTW: stdin and stdout are part of using unnamed pipes!
+• Pro: fast!! Cons: on the same system, still may need parser
+46
+IPC: Even more Techniques
+• Sockets
+• Write to a traditional networked socket via the OS network interface
+• Sockets can be set to “loop back” to the original machine if needed
+• Pro: scalable to multiple systems! Con: slower
+• MANY more IPC strategies: message passing, message queues,
+technology-specific solutions (e.g. Java RMI), memory-mapped files
+• Constantly evolving ecosystem due to security, reliability, simplicity, etc.
+47
+e.g. Qmail (designed as secure replacement for sendmail)
+48
+Remote email
+server
+User-level operations
+• Queue management
+• CLI processing
+• Error handling
+• Configuration
+• Virtual domains
+• Delivery to client
+• etc.
+Small components Trust boundary
+that need to use root
+Larger application
+running with
+user-permissions
+• Small components that really need root rights
+• For assigning ports
+• A larger component that runs with user rights
+• Queue management…
+• If there is a vulnerability there, the attacker does not have root rights
+e.g. Qmail (designed as secure replacement for sendmail)
+49
+“Sort of” Distrustful Decomposition: Google Chrome
+• Each browser tab is a separate process
+• IPC is accomplished primarily through files via their own IPC subsystem
+• Some IPC OS-specific mechanisms for synchronous message passing
+• Restrict rendering processes to their individual tabs
+• BUT! Not exactly “Distrustful”
+• OS-level file permissions are not employed
+• Still a lot of threads and shared memory for performance
+• Vulnerabilities can occur where direct file access results in effective IPC
+50
+e.g. Gone Wrong: Stagefright
+• Stagefright Android Vulnerability of 2015
+• Buffer overflow in video transcoding function that produces a preview
+thumbnail on Android text messages
+• Send a crafted video to a phone -> arbitrary code execution in messages
+• No user intervention required (i.e. previews are automatically generated)
+• BUT!
+• Process listening to text messages requires high privileges
+• Process for producing thumbnails also ran with high privileges
+• Arbitrary code execution with these privileges -> cover your tracks
+51
+e.g. Gone Wrong: Stagefright
+• Stagefright Android Vulnerability of 2015
+• Buffer overflow in video transcoding function that produces a preview
+thumbnail on Android text messages
+• Send a crafted video to a phone -> arbitrary code execution in messages
+• No user intervention required (i.e. previews are automatically generated)
+• BUT!
+• Process listening to text messages requires high privileges
+• Process for producing thumbnails also ran with high privileges
+• Arbitrary code execution with these privileges -> cover your tracks
+52
+e.g. Gone Wrong: Stagefright
+• Stagefright Android Vulnerability of 2015
+• Buffer overflow in video transcoding function that produces a preview thumbnail
+on Android text messages
+• Send a crafted video to a phone → arbitrary code execution in messages
+• No user intervention required (i.e. previews are automatically generated)
+• BUT!
+• Process listening to text messages requires high privileges
+• Process for producing thumbnails also ran with high privileges
+• Arbitrary code execution with these privileges → cover your tracks
+• Lessons learned:
+• Separate complex, non-root functionality from root ones
+• Avoid buffer overflows, of course.
+53
+e.g. Gone Wrong: Stagefright
+54
+Design & Project Implications
+• Distrustful Decomposition is not something you want to procrastinate
+• Easier to build upon than bolt on
+• Introduces distrust at key points in the system
+• Introduces necessary complexity into your system
+• IPC abstracted into a subsystem is often the next step after DD
+• Requires input validation and output normalization/sanitization
+• Requires defining the communication protocols
+55Secure Software Engineering
+Winterterm 2024/25
+Architectural Risk Analysis & Distrustful Decomposition
+Dr. Christian Tiefenau
+Outline
+• Vulnerability of the Day
+Cross-site scripting
+• Risk analysis
+Threat Modeling
+Determine, Rate, Countermeasures
+Data Flow Diagrams and Trust Boundaries
+• Distrustful Decomposition
+Principle of Least Privilege
+Defense in Depth
+Permissions
+IPC
+Vulnerability of the Day
+Cross-site Scripting (XSS)
+3
+XSS - Setting
+• Webpage includes data in dynamic content and is sent to a web user
+• Goal:
+https://www.example.com/?name=JohnDoe
+4
+>Server Output: “Hello JohnDoe”
+<?php
+//Get user input
+if($_GET[ 'name' ] != NULL ) {
+//Create Dynamic Content
+echo '<pre>Hello ' . $_GET[ 'name' ] . '</pre>';
+}
+?>
+XSS - Example
+• Inject code such that this code is executed by the clients browser as
+valid HTML / JavaScript code
+• Injected Code stored in the parameter ?name=<injectedCode>
+Link with this parameter can be distributed
+5
+https://www.example.com/?name=<script>alert('Pwnd');</script>
+>What’s your name?: <script>alert('Pwnd');</script>
+JavaScript
+>What’s your name?: <form>Login:<input type="text" name="firstname"
+value="Mickey"> <br> PW <input type="text" name="lastname"
+value="Mouse"><br> <input type="submit" value="Submit"></form>
+HTML + JavaScript Create a Login form and send data to another server
+Different kinds of XSS
+• Reflective:
+• Injected input is sent back to the client, e.g., using GET parameters in a URL
+the victim got from an attacker
+• Persistent/Stored:
+• Injected input is sent stored on server side and delivered in future request,
+e.g. guest books or user profiles
+• DOM-based / local:
+• Exploit is interpreted/executed on the client machine
+• No server interaction needed
+• Some other attack vector needed, e.g. malicious plugin with access to
+browser content
+6
+Mitigations
+• Escaping “bad” characters via built-in function (no self-made regex)
+7
+<?php
+//Get user input
+if($_GET[ 'name' ] != NULL ) {
+//Escape Special Characters
+$name = htmlspecialchars( $_GET[ 'name' ] );
+//Create Dynamic Content
+echo "<pre>Hello ${name}</pre>";
+}
+?>
+Current Example - CVE-2025-55200
+8
+CVE xxxx-yyyyy
+• Common Vulnerabilities and Exposures (~ 221k)
+• Managed and hosted by MITRE
+• https://cve.mitre.org/
+• We already referred to it every lecture
+• E.g., CVE-2011-1153
+9
+Listed as CWE-79
+10
+https://cwe.mitre.org/data/definitions/79.html
+Architectural Risk Analysis &
+Distrustful Decomposition
+11
+12
+Requirements
+and Use Cases
+Architecture
+And Design Test Plans Code Test and
+Test Results
+Feedback from
+the Field
+Risk Analysis
+Security
+Requirements
+Misuse/Abuse
+Cases
+Different View on your System
+• Previously: Abuse & Misuse Cases:
+• Start with the functionality
+• p(exploit), p(vulnerability)
+• Start with what to protect
+• Assets
+• Domain, domain, domain
+• Goals -> High-level Risks -> Indicators -> Tests
+• Today: start with what to protect against
+• Threats, attacks
+13
+Back in 2002…
+14
+• Windows XP was cutting edge technology (and ran on a tablet!)
+• But also…
+2002 – Bill Gates on Trustworthy Computing
+From: Bill Gates
+Sent: Tuesday, January 15, 2002 5:22 PM
+To: Microsoft and Subsidiaries: All FTE
+Subject: Trustworthy computing
+Every few years I have sent out a memo talking about the
+highest priority for Microsoft. Two years ago, it was the
+kickoff of our .NET strategy. Before that, it was several
+memos about the importance of the Internet to our future
+and the ways we could make the Internet truly useful for
+people. Over the last year it has become clear that
+ensuring .NET is a platform for Trustworthy Computing is
+more important than any other part of our work. If we
+don't do this, people simply won't be willing — or able —
+to take advantage of all the other great work we do. ...
+15 https://www.wired.com/2002/01/bill-gates-trustworthy-computing/
+• … Bill Gates informed about the importance of Trustworthy Computing 
+Trustworthy Computing Initiative
+• The Microsoft initiative really changed the way in which people engineered software
+• First big company known to adopt dedicated secure software engineering practices
+• Over the years, Microsoft also researched and developed many appropriate methodologies
+16
+• Create Data Flow Diagram
+• Identify Threats for each element
+• Discuss, Refine & Rate Threats
+• Provide Mitigation for Threats
+• Create Threat Model Report
+Threat Modeling
+Tool
+STRIDE
+• We‘ll see some of them
+in this lecture
+Influences on todays software
+• Also influenced current standards and certifications:
+• IT-Sicherheitsgesetz 2.0 (https://www.bsi.bund.de/EN/Das-BSI/Auftrag/Gesetze-und-Verordungen/IT-SiG/2-0/it_sig-2-0_node.html)
+• “KRITIS” companies have to report cyber attacks
+• Develop and define security processes and standards
+• Will be certified and controlled by BSI
+• Also new EU directive (“NIS-Richtlinie”)
+• BSI Grundschutz (https://www.bsi.bund.de/EN/Themen/Unternehmen-und-Organisationen/Standards-und-Zertifizierung/IT-Grundschutz/it-grundschutz_node.html)
+• BSI already provides guidelines for basic security
+• Contains also guidelines for threat modeling and risk analysis
+• Certifications, e.g., ISO 27000 family for ISMS (https://www.iso.org/standard/iso-iec-27000-family)
+• Focuses on holistic approach
+• Threat Modeling is part of this process
+17
+Secure Development Lifecycle – Phases and Costs
+18
+Cost to fix a vulnerability
+30x
+20x
+10x
+5x
+Requirements
+and Use Cases
+Architecture
+And Design Test Plans Code Test and
+Test Results
+Feedback from
+the Field
+• Detecting vulnerabilities early on helps to reduce costs.
+Architectural Risk Analysis
+• Structured, repeatable approach to identify potential security
+flaws in software or systems at design time
+• Teamwork (!)
+• Modeling aspects of the system for the purpose of finding
+threats
+• “Threat Modeling”
+• Discuss security risk once most of the architecture is settled
+• Motivation: a few good early decisions go a long way, e.g.,
+• Incorporating encryption at the right places
+• Authentication & access control concerns
+• Choice of technologies used
+19
+Architectural Risk Analysis
+• Answer questions like
+• What are potential threats?
+• What are my assets? (also)
+• Who would / can attack me?
+• Emphasis of design flaws over code-level vulnerabilities
+• Must-haves vs. Nice-to-haves at the design level
+• Starting point for documentation and further security actions during the
+development
+20
+Threat Modeling – General Approach
+• Determine threats
+• Identify entry/exit points
+• Identify trust boundaries
+• Identify threats
+• Rate threats
+• Identify most probable threats
+• Identify most critical threats
+• Determine countermeasures
+• Identify solutions to mitigate threats
+• Document non-mitigated threats
+21
+Data Flow Diagram Primitives
+• External interactors
+e.g. clients, other systems, dependencies
+• Process
+Architecture-centered functionality
+e.g. dispatcher, input validator
+• Datastore
+e.g. database, file system
+• Data flow
+Domain-specific explanation of data
+e.g. “Login Requests”
+22
+Process
+Datastore
+Data
+Ext. Entity
+Threat Modeling – Data Flow Diagrams
+23
+Web Server SQL
+Database
+Page Request
+Query for Webpage
+Content
+Webpage Content
+Browser
+External Entity
+Process
+Data Store
+Data Flow
+Trust Boundaries
+• Draw trust Boundaries: data from one party to another is not trusted
+• Untrusted examples
+• Data from a web browser (e.g. external interactor)
+• Data from one machine to another
+• Trusted examples
+• Data from another process within the same runtime environment
+• Data from the database
+24
+Trust Boundary
+Threat Modeling – Data Flow Diagrams
+25
+Web Server SQL
+Database
+Page Request
+Query for Webpage
+Content
+Webpage Content
+Browser
+External Entity
+Process
+Data Store
+Data Flow
+Trust Boundary
+• Trust boundary here, because we‘re not able to control the things
+that happen between a browser and our server
+Threat Modeling – Data Flow Diagrams
+26
+Web Server SQL
+Database
+Page Request
+Query for Webpage
+Content
+Webpage Content
+Browser
+Naming is HTTP Request
+Important
+Good Starting Point
+for Finding Threats
+• Use names that are as specific as possible.
+• HTTP Request could be anything (GET,POST,…)
+Data Flow Diagrams – Example Scenario
+27
+External Entity
+Process
+Data Store
+1. What is the scenario?
+2. Is something missing?
+3. Suggest trust boundaries.
+Data Flow Diagrams – Example Scenario
+28
+1. What is the scenario?
+2. Is something missing?
+3. Suggest trust boundaries.
+Threat Modeling
+STRIDE per Element
+29
+Recap: Threat Categories - STRIDE
+30
+“Pretending to be something or someone other than yourself.”
+Spoofing
+“Allowing someone to do something they’re not authorized to do.”
+Elevation of Privilege
+“Absorbing resources needed to provide service.”
+Denial of Service
+“Providing information to someone not authorized to see it.”
+Information Disclosure
+“Claiming that you didn’t do something, or were not responsible.”
+Repudiation
+“Modifying something on disk, on a network, or in memory.”
+Tampering
+[Shostack, A. (2014). Threat modeling : designing for security., Indianapolis, Ind. : Wiley.]
+STRIDE per Element
+31
+• Performed against each and every component
+• Pro‘s:
+• Systematic coverage
+• Independent analysis
+• Relating threats to components
+• Cons:
+• Time consuming
+• Misses interaction-level threats
+• Duplicate threats if they are the same for different components
+STRIDE per Element
+32
+Component S T R I D E
+External Entity
+Process
+Data Store
+Data Flow
+Web
+Server
+SQL
+Database
+Browser
+• Analysis example for our scenario. Result can look like this:
+Data Flow Diagrams – Mapping Threats
+33
+Spoofing User
+Browser Identity
+Task:
+1. Name some threats based on
+“STRIDE per element”.
+2. Discuss the threats. Are they applicable?
+S T R I D E
+User Browser
+Library
+Management
+System
+Web Servlet
+Logging
+Database
+Information Disclosure
+of Logs
+Tampering on
+Web Servlet
+Repudiation
+STRIDE per interaction
+34
+[Shostack, A. (2014). Threat modeling : designing for security., Indianapolis, Ind. : Wiley.]
+• Performed against each interaction
+• Pro‘s:
+• Focuses on real attack paths (across
+interactions instead of isolated components)
+• Less duplication
+• Less time consuming
+• Cons:
+• Misses threats on component level (e.g.,
+vulnerabilities)
+• Achieving full coverage is hard
+MS Threat Modeling Tool | Tool of your choice
+• Architectural risk analysis tool
+• Originally built on top of Visio
+• 2014 and 2016 versions
+largely updated
+• Follows STRIDE concept
+• Provides Modeling & Analysis View
+• You can use that in the exercises
+• But www.draw.io (or similar tools) work too
+35
+https://blogs.microsoft.com/microsoftsecure/2015/10/07/whats-new-with-microsoft-threat-modeling-tool-2016/
+or
+https://learn.microsoft.com/en-us/azure/security/develop/threat-modeling-tool
+36
+Analysis View
+List of threats
+Detailed description
+Analysis View
+• Generate potential threats that must be mitigated
+• Based on components, their types and their connections
+• Forces you to describe mitigations
+• Helps you to record assumptions
+• Go directly to file a bug
+• Threats are particularly bad when…
+• Flows cross boundaries
+37
+Threat Models != Architecture
+• Threat models are specifically about modeling security
+• We do not create our architecture with them
+• Architecture diagrams depict subsystems responsibility
+• What component exists and what is each one responsible for?
+• How does the system work?
+• Threat Model is security focused
+• Based on data flows
+• Naming and characterizing the data that will be transported from one part of the system to another
+• Iteratively mitigating risks the tool tells us about
+• How could the system be attacked
+• Big architectures may end up being one big bubble
+• It‘s not sufficient to look at modules on their own
+• Small features in the architecture might constitute an entire process in a threat model
+38
+Tip: Naming Is Huge
+• The flow names should be meaningful
+• Bad: “HTTP”, “Request”
+• Good: “Blog Content”, “Scrape Requests”
+• Name your trust boundaries
+• Bad: “Machine boundary”, “Database boundary”
+• Good: “External Partner API Boundary“, “Identity Provider Boundary“
+• Processes & external interactors
+• Bad: “server”
+• Good: “feedly.com”
+• Ultimate test: outsiders should understand your system without much
+other info than the data flow diagram
+39
+More Tips for Threat Modeling
+• Be honest with the process
+• Make sure the model represents reality
+• Consider all types of threats –
+code-level vulnerabilities are just a “for example”
+• As with all modeling, use appropriate complexity
+• Overly-simplified?
+• Departs from reality
+• You get exactly what you put into it – no new knowledge
+• Overly-complicated?
+• Too much to analyze
+• “Check it off the list” syndrome
+• Test your model
+Think of a specific security concern, then try to see where it fits in your threat model
+40
+Architectural Risk Analysis &
+Distrustful Decomposition
+41
+Key Principles
+• Principle of Least privilege
+• Defense in Depth
+• Obviously No Vulnerabilities
+• Assuming the attacker gets past that other defense, how do we:
+• Protect the inner parts of the system?
+• Limit the capabilities of the attacker?
+• Believe our critical subsystems are secure?
+42
+Permissions Challenges
+• When programs are executed, the running code has permissions
+• via executing user, setuid, setgid, Java security manager, etc.
+• Many programs need elevated (root) permissions to function
+• Web servers: listen & respond on HTTP, e.g. port 80
+• Email servers: listen & respond on SMTP, e.g. port 25
+• Browser plugins: website access, history access, …
+• Mobile apps: listening for text messages, accessing geo location
+• What permissions are truly needed, and when?
+• Solution: design your architecture around your permissions needs
+43
+Distrustful Decomposition
+• Decompose the system into separate processes with separate permissions
+• i.e. fork(), NOT threads. Why?
+• Threads still have shared memory!
+• Communicate via inter-process communication (see next slides)
+• Each operating-system process distrusts the other
+• i.e. validate the input from the other process
+• i.e. re-check credentials and integrity mechanisms
+• Simplify the root-level subsystems to an extreme extent
+• Outcomes
+• Complex code gets sandboxed -> reduce impact of an exploit
+• More security checks get incorporated throughout the code
+• Incorporate distrust at the architecture level
+44
+IPC: Simple Techniques
+• Files
+• Simplest for most developers, but…
+• Files have no structure to them -> complexity in inputs!
+• File parsers are themselves among the most vulnerable components!
+• Locking gets tough. It must be respected (concurrency challenges ->
+complexity!!)
+• Signals
+• Simple messaging, sometimes allow data to be transferred (e.g. Android)
+• Pre-defined by OS (Unix has ~30 of these)
+• e.g. SIGINT, SIGTERM, SIGKILL, SIGSEGV, SIGPOLL
+45
+IPC: More Techniques
+• Clipboard
+• Can set and get clipboard programmatically
+• Users don’t like you messing with this
+• Also can be a security risk in itself!
+• Named pipes a.k.a. a FIFO buffer
+• Define a “virtual file” that one process can write to and another process reads
+from
+• Supported at the OS (file system) level
+• BTW: stdin and stdout are part of using unnamed pipes!
+• Pro: fast!! Cons: on the same system, still may need parser
+46
+IPC: Even more Techniques
+• Sockets
+• Write to a traditional networked socket via the OS network interface
+• Sockets can be set to “loop back” to the original machine if needed
+• Pro: scalable to multiple systems! Con: slower
+• MANY more IPC strategies: message passing, message queues,
+technology-specific solutions (e.g. Java RMI), memory-mapped files
+• Constantly evolving ecosystem due to security, reliability, simplicity, etc.
+47
+e.g. Qmail (designed as secure replacement for sendmail)
+48
+Remote email
+server
+User-level operations
+• Queue management
+• CLI processing
+• Error handling
+• Configuration
+• Virtual domains
+• Delivery to client
+• etc.
+Small components Trust boundary
+that need to use root
+Larger application
+running with
+user-permissions
+• Small components that really need root rights
+• For assigning ports
+• A larger component that runs with user rights
+• Queue management…
+• If there is a vulnerability there, the attacker does not have root rights
+e.g. Qmail (designed as secure replacement for sendmail)
+49
+“Sort of” Distrustful Decomposition: Google Chrome
+• Each browser tab is a separate process
+• IPC is accomplished primarily through files via their own IPC subsystem
+• Some IPC OS-specific mechanisms for synchronous message passing
+• Restrict rendering processes to their individual tabs
+• BUT! Not exactly “Distrustful”
+• OS-level file permissions are not employed
+• Still a lot of threads and shared memory for performance
+• Vulnerabilities can occur where direct file access results in effective IPC
+50
+e.g. Gone Wrong: Stagefright
+• Stagefright Android Vulnerability of 2015
+• Buffer overflow in video transcoding function that produces a preview
+thumbnail on Android text messages
+• Send a crafted video to a phone -> arbitrary code execution in messages
+• No user intervention required (i.e. previews are automatically generated)
+• BUT!
+• Process listening to text messages requires high privileges
+• Process for producing thumbnails also ran with high privileges
+• Arbitrary code execution with these privileges -> cover your tracks
+51
+e.g. Gone Wrong: Stagefright
+• Stagefright Android Vulnerability of 2015
+• Buffer overflow in video transcoding function that produces a preview
+thumbnail on Android text messages
+• Send a crafted video to a phone -> arbitrary code execution in messages
+• No user intervention required (i.e. previews are automatically generated)
+• BUT!
+• Process listening to text messages requires high privileges
+• Process for producing thumbnails also ran with high privileges
+• Arbitrary code execution with these privileges -> cover your tracks
+52
+e.g. Gone Wrong: Stagefright
+• Stagefright Android Vulnerability of 2015
+• Buffer overflow in video transcoding function that produces a preview thumbnail
+on Android text messages
+• Send a crafted video to a phone → arbitrary code execution in messages
+• No user intervention required (i.e. previews are automatically generated)
+• BUT!
+• Process listening to text messages requires high privileges
+• Process for producing thumbnails also ran with high privileges
+• Arbitrary code execution with these privileges → cover your tracks
+• Lessons learned:
+• Separate complex, non-root functionality from root ones
+• Avoid buffer overflows, of course.
+53
+e.g. Gone Wrong: Stagefright
+54
+Design & Project Implications
+• Distrustful Decomposition is not something you want to procrastinate
+• Easier to build upon than bolt on
+• Introduces distrust at key points in the system
+• Introduces necessary complexity into your system
+• IPC abstracted into a subsystem is often the next step after DD
+• Requires input validation and output normalization/sanitization
+• Requires defining the communication protocols
+55

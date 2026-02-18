@@ -1,0 +1,484 @@
+Secure Software Engineering
+Winterterm 2023/24
+Vulnerability Assessment
+Dr. Christian Tiefenau
+Florin Martius
+1
+Vulnerability of the day
+Cache Poisoning
+2
+VOTD: Cache Poisoning – Actually an
+attack technique
+3
+http://capec.mitre.org/data/definitions/141.html
+Common Attack Pattern Enumeration and Classification
+Example: BIND DNS Cache Poisoning
+Attack
+1. Attacker continuously issues DNS queries to DNS server
+• Server will delegate up, asking its parent for the record
+2. Attacker also sends forged, incorrect responses to server
+• Problem: authenticity of response checked by a too small nonce
+3. Once the correct nonce is (coincidentally) sent to the server, server
+will cache bogus record
+4. Henceforth queries for that domain will yield the bogus response
+State-of-the-art solution: DNSSec 4
+1
+2
+Avoiding cache poisoning
+• If possible, don’t allow users to set their own cache expiration dates
+• If possible, don’t allow users much control over caches to begin with
+• As always, input validation helps, but it should be complemented with other countermeasures.
+5
+Vulnerability Assessment
+6
+Today’s lecture
+7
+Requirements
+and Use Cases
+Architecture
+And Design Test Plans Code Test and
+Test Results
+Feedback from
+the Field
+Vulnerabilities
+• No system is completely free of vulnerabilities
+• What to do, if a vulnerability is found?
+• Investigate how “bad” this vulnerability is
+• In general
+• For your system / deployment
+• Fix /Patch the problem
+• Share with others
+• Common Vulnerabilities and Exposures (~ 221k)
+• Managed and hosted by MITRE
+• https://cve.mitre.org/
+• We already referred to it every lecture
+• E.g., CVE-2011-1153
+8
+Today
+Next Lecture
+How Bad is Bad?
+• We’ve seen many vulnerabilities
+• Many of them can do catastrophic things
+• Danger really “depends on the situation”
+• Many, many situational factors, such as:
+9
+Asset exposed, and its relative importance
+Error -47. The system will
+be restarted.
+O.k.
+Remotely, or locally exploitable?
+Expertise needed to exploit the vulnerability?
+Affects all deployments?
+How much traction did the problem have already?
+Impact on CIA properties
+Rating Vulnerabilities vs. Risk Management
+Risk Management
+• Starts in early development
+phases, e.g., design
+• Based on potential threats to the
+system
+• Goal: Prevent (important)
+vulnerabilities
+Vulnerability Assessment
+• Only applicable for existing systems
+• Applied to concrete vulnerabilities and
+(in the best case) corresponding exploits
+• Goal: Fix and prevent further
+(important) vulnerabilities
+• Similar to risk management, you have to rate found vulnerabilities
+• How crucial is the vulnerability?
+If risk management is used/updated throughout the lifecycle, it can
+also support vulnerability assessment.
+10
+Rating Vulnerabilities
+• We need a method to rate discovered vulnerabilities
+• Should take all essential factors into account
+• Should be repeatable and deterministic (to a certain degree)
+• Should result in comparable results (order of importance)
+• Should be approved by experts / industry
+ Common Vulnerability Scoring System (CVSS)
+11
+CVSS Common Vulnerability Scoring System
+• An open scoring system from FIRST
+• FIRST: Forum for Incident Response & Security Teams
+• http://www.first.org/cvss
+• A group of researchers & practitioners
+• Adopted by NIST
+• CVSS added in CVE descriptions
+• NVD (NIST) provides CVSS scores for all CVE
+• Latest version: v3.1 (2019)
+• Mostly applied in industry: v2
+• Provide a set of metrics, and corresponding values and weighting functions
+12
+Temporal Metrics
+Change over time.
+Environmental Metrics
+Your own organization’s
+priorities. May vary in
+different deployments.
+Base Metrics
+Core aspects of
+the vulnerability.
+CVSS Metric Groups
+13
+Vulnerability
+Score
+https://www.first.org/cvss/specification-document
+CVSS Metric Groups
+https://www.first.org/cvss/specification-document
+Typically done by vulnerability
+bulletin analysts, security product
+vendors, or application vendors
+To be done by “user”
+organisation
+14
+Base Metric Group
+• Exploitability metrics
+• Characteristics of how a given thing is vulnerable
+• Scored relative to vulnerable component
+• Impact metrics
+• Represent the consequence to the thing that
+suffers the impact
+• Scope
+• Which parts of the system are affected?
+15
+Base Metrics
+Attack
+Vector
+Attack
+Complexity
+Privileges
+Required
+User
+Interaction
+Confidentiality
+Impact
+Integrity
+Impact
+Availability
+Impact
+Scope
+Exploitability
+Impact
+Scope
+Base Attack Vector (AV)
+• Through what entry gates can an attacker exploit the vulnerability?
+• Metric Value:
+• (P) Physical
+• (L) Local only
+• (A) Adjacent network (e.g. wi-fi, local IP subnet)
+• (N) Network: fully remotely exploitable
+• More than one level affected? Go with the worse one
+• Client that opens stuff from an untrusted internet source?
+Go with Network (e.g. zip utility with a buffer overflow)
+16
+Attack
+Vector
+Attack
+Complexity
+Privileges
+Required
+User
+Interaction
+Exploitability
+1. XSS in a webapp?
+2. No HTTPS on banking website?
+(N)
+(A)
+Base Attack Complexity (AC)
+• How complex is the vulnerability to exploit?
+• One step? e.g. SQL Injection
+• Multiple steps?
+e.g. convince an email user to download a sketchy attachment
+• Metric value
+• (H) High: Specialized access conditions
+• e.g. overcoming advanced exploit mitigation techniques
+• e.g. knowledge about the environment necessary
+• e.g. man in the middle attack
+• (L) Low: no specialized conditions
+• e.g. default configuration
+• e.g. requires little skill to perform
+• Attacker can expect repeatable success
+• Note: Low complexity is bad
+17
+Attack
+Vector
+Attack
+Complexity
+Privileges
+Required
+User
+Interaction
+Exploitability
+Base Privileges Required (PR)
+• Level of privileges needed for exploit?
+• Metric value
+• (H) privileges that provide significant control
+• (e.g. administrative)
+• (L) privileges that provide basic user capabilities
+• (N) No authorization needed
+• In an authentication system itself? (e.g. Kerberos) … go with (N)!
+18
+Attack
+Vector
+Attack
+Complexity
+Privileges
+Required
+User
+Interaction
+Exploitability
+1. Path traversal in photo upload for a Twitter client?
+2. Insecure PRNG for session IDs?
+(L)
+(N)
+Base User Interaction (UI)
+• Do we need a user, other than the attacker, participating in the
+exploit?
+• Metric value
+• (N): can be exploited without interaction from any user
+• (R): requires a user to take action
+• E.g. exploit may only be possible during the installation of an application by a system
+administrator.
+19
+Attack
+Vector
+Attack
+Complexity
+Privileges
+Required
+User
+Interaction
+Exploitability
+1. Reflected XSS?
+2. CSRF?
+(R) – must click on a link
+(R) – need victim to create the http request & be logged in
+Base CIA Impact
+• Any impact on
+• confidentiality, integrity, and/or availability?
+• These are three separate metrics
+• Metric Value (for each metric)
+• (N) None
+• (L) Low
+• e.g. disclosing a few database tables
+• e.g. temporary DoS
+• (H) High
+• e.g. reading arbitrary memory locations is High Disclosure
+• e.g. full bypass of plug-in sandbox is High Integrity
+• e.g. root-level access? High on all three metrics
+20
+Attack
+Vector
+Attack
+Complexity
+Privileges
+Required
+Confidentiality
+Impact
+Integrity
+Impact
+Availability
+Impact
+Impact
+Hardcoded root credentials in blogging software?
+C = High | I = High | A = High (Multiple Scenarios possible)
+Base: Scope
+• The ability for a vulnerability in one software component to impact
+resources beyond its means, or privileges.
+• Metric Value
+• (U): Unchanged
+• The vulnerable component and the impacted component are the same
+• Or both are managed by the same security authority
+• (C): Changed
+• The vulnerable component and the impacted component are different
+• And both are managed by the same security authority
+21
+Attack
+Vector
+Scope
+Scope
+1. Vulnerability in a Linux VM that compromises the host OS?
+2. Using crafted office file to cause a DoS in office suite?
+(C)
+(U) 
+Temporal Exploitability (E)
+• Is an exploit publicly known?
+• Metric Value
+• (U) Unproven, entirely theoretical exploit
+• (POC) Proof-of-concept exists out there, no known maliciously used exploits
+• (F) Functional exploit is available
+• (H) Functional Exploit is widely disseminated
+• (X) Not defined (skip this part of the metric)
+• Notes
+• This usually elevates quickly!
+• Many white-hats will write exploits to make this score go up so that it becomes fixed
+22
+Exploit Code
+Maturity
+Remediation
+Level
+Report
+Confidence
+Temporal
+Temporal Remediation Level
+• What is the level of remediation (RL)?
+• How has the vendor reacted?
+• Levels
+• (O) Official Fix is available
+• (TF) Temporary fix is available
+• (W) Workaround is available
+• Unofficial, non-vendor patches
+• Temporary change in configuration
+• (U) Nothing is released yet
+• (X) Not defined
+23
+Exploit Code
+Maturity
+Remediation
+Level
+Report
+Confidence
+Temporal
+Temporal Report Confidence
+• What is the report confidence (RC)?
+• (U) Unconfirmed by the source, or there are multiple conflicting reports
+• (R) Significant details are published e.g. proof-of-concept
+• (C) Confirmed by the source
+• (ND) Not defined
+24
+Exploit Code
+Maturity
+Remediation
+Level
+Report
+Confidence
+Temporal
+Environmental
+Modified Base Metrics
+• Modified Base Metrics
+• Metrics according to modifications that exist within the environment
+• Loss of life, physical assets, productivity
+• Levels:
+• None
+• Low
+• Medium
+• High
+• Not defined
+25
+Modified
+Base Metrics
+Security
+Requirements
+Environmental
+Environmental
+Security Requirements
+• Security Requirements
+• Confidentiality Requirement (CR)
+• Integrity Requirement (IR)
+• Availability Requirement (AR)
+• Reweighting the modified CIA impact metrics
+• Metric Value: Loss of CIA has…
+• (X): Not defined. It will not influence the score.
+• (H): A catastrophic adverse effect
+• (M): A serious adverse effect
+• (L): A limited adverse effect
+26
+Modified
+Base Metrics
+Security
+Requirements
+Environmental
+Scoring
+27
+https://www.first.org/cvss/specification-document
+Scoring – Base Metrics Equations
+28
+…
+Attack Vector / Modified Attack Vector Network 0.85
+Adjacent 0.62
+Local 0.55
+Physical 0.2
+Attack Complexity / Modified Attack Complexity Low 0.77
+High 0.44
+Privileges Required / Modified Privileges
+Required
+None 0.85
+Low 0.62 (or 0.68 if Scope / Modified Scope is
+Changed)
+High 0.27 (or 0.5 if Scope / Modified Scope is
+Changed)
+User Interaction / Modified User Interaction None 0.85
+Required 0.62
+Confidentiality / Integrity / Availability /
+Modified Confidentiality / Modified Integrity /
+Modified Availability
+High 0.56
+Low 0.22
+None 0
+Not relevant in the exam
+Scoring – Base Metrics Equations
+29
+Scoring – Temporal + Environmental
+Metrics Equations
+30
+Scoring Tips
+• Ignore interactions with other vulnerabilities, score each individually
+• Assume the most common or default configuration of the server
+• Score the greatest exploitation impact, if there are many
+31
+Example: CVE-2014-0160 (Heartbleed
+Bug)
+32
+Example: CVE-2014-0160 (Heartbleed
+Bug)
+• CVSS v3.1 Base Score: 7.5
+33 https://www.first.org/cvss/examples
+Example: CVE-2014-0160 (Heartbleed
+Bug)
+• CVSS v3.1 Base Score: 7.5
+• In CVSS v2.0, Heartbleed had only a score of 5.0!
+34
+Alternative: CWSS
+• Common WEAKNESS Scoring System
+• Relatively recent (~2010) response to CVSS
+• More detailed, but not as widely-adopted
+• http://cwe.mitre.org/cwss/
+• Categories: Base, Attack Surface, Environmental
+• Base Finding Metric Group
+• 5 metrics in this group
+• e.g. Acquired Privilege
+• User-level access acquired. Admin?
+• e.g. Acquired Privilege Layer
+• Access to Network, App, entire Enterprise
+• e.g. Internal Control Effectiveness
+• Would our internal detection measures have been effective? Would we have known this was
+exploited?
+42
+Alternative: CWSS (cont.)
+• Attack Surface Metric Group
+• 7 metrics in this group
+• e.g. Required Privilege AND Required Privilege Layer
+• How much authentication was needed?
+• e.g. Level of Interaction
+How much social engineering is required?
+• Environmental Impact Group
+• 6 metrics in this group
+• e.g. Business Impact
+• e.g. Likelihood of Discovery
+• e.g. Likelihood of Exploit
+• e.g. Remediation Effort
+• Is this a really difficult fix? Should we be worried about this coming up again or being
+incorrectly fixed?
+43
+Further Reading
+• Official Specification
+• https://www.first.org/cvss/specification-document
+• User Guide
+• https://www.first.org/cvss/user-guide
+• Examples
+• https://www.first.org/cvss/examples
+• Calculator
+• https://www.first.org/cvss/calculator/3.1
+• https://www.first.org/cvss/use-design
+44

@@ -1,0 +1,297 @@
+Fundamentals of
+Secure Software
+Engineering
+Winter term 2025/26
+LLMs and Secure Software Engineering
+Dr. Sergej Dechand / Dr. Christian Tiefenau
+CWE-506: Embedded Malicious Code aka Dependency Backdoors
+2
+🐛 Vulnerability of the day
+Embedded Malicious Code
+3
+Bring someone to load your code opening a backdoor
+🦹 Attack Idea
+○ Convince victim to load your controlled “open-source” library solving their problem
+○ But also insert a backdoor triggering under certain conditions
+💾 Numerous approaches
+○ Build legitimate library and insert backdoor
+○ Compromise maintainer
+○ Typosquatting for famous libraries
+○ …
+💥 Known as CWE-506 Embedded Malicious Code but mostly referred as
+backdoors
+(Almost) Perfect Crime | XZ Utils Backdoor (CVE-2024-3094)
+🧩 XZ Utils
+set of free software command-line tools for lossless data compression, using the highly
+efficient LZMA/LZMA2 algorithms, popular in Linux/Unix systems for shrinking files like
+software packages and kernel images. Also used in SSH under special circumstances.
+💣 After years of benign contributions a backdoor was placed
+● Attacker "Jia Tan" built trust over ~2 years with legitimate contributions
+● Malicious code hidden in binary test files (not in source)
+● Triggered only when building .deb/.rpm packages with specific conditions
+● Targeted OpenSSH via systemd integration → allowed unauthorized remote access
+🔍 Discovery
+● Andres Freund noticed 500ms SSH latency + CPU spikes
+● Investigated and found the backdoor in March 2024
+● Caught before major distro stable releases (very close call)
+4
+(Almost) Perfect Crime | XZ Utils Backdoor (CVE-2024-3094)
+5
+Impact | Why CWE-506 is Dangerous
+6
+🧩 Detection is Nearly Impossible
+● Code review won't catch it (build-time injection)
+● Static analysis sees clean source
+● CI/CD passes all checks
+● Signed by legitimate certificates
+💣 XZ Was Found by Luck
+"I was benchmarking PostgreSQL and noticed SSH logins taking 500ms..."
+— Andres Freund
+🔍 Attack Characteristics
+● Years of preparation (social engineering)
+● Targeted single burned-out maintainer
+● Obfuscated in test fixtures and riggered only in specific build configs
+● Almost made it into stable distros
+Separate Topic in SSE | Digital Supply Chains
+7
+MA-INF 3246 | Security in Digital
+Supply Chains
+Ensuring software security through the
+timely detection of tampering with
+components of the software supply chain,
+taking into account the challenges and
+opportunities of using software from
+unknown sources.
+Dr. Marc Ohm (Informatik 4)
+8
+Requirements
+and Use Cases
+Architecture
+And Design Test Plans Code Test and
+Test Results
+Feedback from
+the Field
+Risk-Based
+Security Tests
+Code Review Security and
+Penetration Testing
+Security
+Operations
+External
+Review
+Risk Analysis
+Security
+Requirements
+Abuse
+Cases Static Analysis
+Lecture Summary
+Recap| Static Application Security Testing (SAST)
+📘 Definition
+Pattern matching and taint analysis on code (and their associated code property graphs) so
+that we can find issues
+✅ Strengths
+○ Full code coverage (analyzes all paths)
+○ Early detection (no running system needed)
+○ …
+Limitations
+○ High false positive rates
+○ Misses runtime behavior
+○ Struggles with business logic flaws
+○ Can't see configuration/environment issues
+9
+Analyzes source code without executing it (Grammarly for Security)
+Recap | Fuzzing
+● Generate / mutate inputs until program crashes
+○ Coverage-guided: prioritize inputs that reach new code paths
+● Test Harness: Entrypoint for the Programm under Test
+● Bug Oracles: Bug detection beyond crashes → Memory issues, Injections, etc.
+● Grammars: formal code specification how an input must be structured to be
+accepted
+○ valid symbols
+○ structural
+● Good Input Samples: A finite set of predefined inputs leading to interesting
+paths of a program
+● Limitations: engineering effort vs uncovered code
+10
+Augment Security Testing
+with LLMs
+“Machine learning is the second-best solution to every problem.” Pete Warden
+TensorFlow
+11
+Large Language Models
+Probabilistic Sequence Model on Top of Neural Networks
+○ Learns 𝑃(next token∣context)
+Trains on large corpora
+○ Internet, Code, Books → statistic Patterns
+Strengths and Weaknesses
+○ ✔ Code/Test Generation, Understanding Structure
+○ ✘ Guarantees, Correctness, Actual Intents
+12
+Derived From
+LLM + SAST | Steady Progress, Shared Limitations
+Where LLMs augment SAST
+● Explaining findings in natural language
+● Suggesting fixes
+● Reducing triage burden
+● Writing new rules based on internal APIs
+Shared Limitations Remain
+● Both rely on pattern recognition
+○ Hallucinations vs False Positives
+○ Only predefined patterns → False Negatives
+● Runtime behavior remains invisible
+● Only as good as known vulnerability patterns
+13
+Growing investment in LLM-augmented static analysis (GitHub, Snyk, Semgrep, etc.)
+AI Slop Complaints
+14
+Source
+DAST + LLM | Complementary Strengths
+15
+DAST / Fuzzing SAST / LLMs*
+Execution Actually runs code No execution
+Real bugs Crash = real bug Can hallucinate issues
+Grammar/Structure Struggles with complex structures Understands structure
+Harness writing Manual effort Can generate code
+Feedback Loop Automatically learns with new coverage No learning without human
+* If not combined with dynamic tools
+Recap | Test Configuration for Commons Imaging
+16
+Find lots of parsing issues
+📦 Unit Testing
+With jUnit and Mockito by writing test cases based on a
+developer’s knowledge
+@Test
+public void testGetBufferedImg10() throws Exception {
+ File file = TestResources.resourceToFile("t1.jpg");
+ JpegImageParser prsr = new JpegImageParser();
+ BufferedImage img = prsr.getBufferedImage(file);
+ assertEquals(680, img.getWidth());
+ assertEquals(241, img.getHeight());
+ assertEquals(-16777216, img.getRGB(0, 0));
+ assertEquals(-12177367, img.getRGB(198, 13));
+}
+🔀 Fuzz Testing
+Testing libraries for potential security issues by providing
+Fuzz Targets / Test Harnesses defining the grammar for all
+inputs
+@FuzzTest
+public void buffImgFuzzTest(ByteSourceArray input) {
+ try {
+ JpegImageParser prsr = new JpegImageParser();
+ prsr.getBufferedImage(input, new HashMap<>());
+ } catch (IOException | ImageReadException ignored) {
+ }
+}
+// https://issues.apache.org/jira/browse/IMAGING-277 and
+// https://issues.apache.org/jira/browse/IMAGING-278
+LLMs for
+pattern
+matching
+identify and generate entry points
+Generate Test Harnesses | Basic Concept
+17
+Generate Test Harnesses | Current Research
+Current Research
+Meng et al.: Large Language Model guided Protocol Fuzzing: NDSS 2024
+Xia et al.: Fuzz4All: Universal Fuzzing with Large Language Models: ICSE 2024
+Zhang et al.: How Effective Are They? Exploring Large Language Model Based Fuzz Driver Generation: ISSTA 2024
+Lyu et al.: Prompt Fuzzing for Fuzz Driver Generation: CCS 2024
+Xu et al.: CKGFuzzer: LLM-Based Fuzz Driver Generation Enhanced By Code Knowledge Graph: ICSE 2025
+Liu et al.: PromeFuzz: A Knowledge-Driven Approach to Fuzzing Harness Generation with Large Language Models: CCS 2025
+Sophisticated Tooling
+● Claude Code (Anthropic) and Codex (OpenAI) support AFL++ and Jazzer
+● OSS-Fuzz Gen: A Framework for Fuzz Target Generation and Evaluation
+● Commercial products for business use cases
+18
+19
+Challenge Task | Build Cyber Reasoning System
+Cyber Reasoning System
+○ Detect and Prove Vulnerability → Triggered Bug Oracle
+○ Deduplication
+○ Patching
+○ Offline und autonomous
+○ C und Java Projects
+Every Solution Must be Open Source
+20
+Detect and Patch Vulnerability in an Unknown Application w/out Internet Access
+The following section presents the results from the WASPS team at AIxCC: M. Meier, A. Kuntze, V. Eyshold, C. Geron, M. Shevchishin,
+N.Steffen, M. Leiwig, J. Steffen, et al
+Following slides are based on the 39C3 presentation by Annika Kuntze & Mischa Meier 
+Uni Bonn | WASPS Team
+21
+Reached the Semi Finals
+https://wasp.systems/
+Different Approach | Find out Input Structure for Given Interface
+General Idea
+○ Humans and LLMs will always write “incomplete” test harnesses
+○ We take existing interfaces / harnesses as they are
+○ But use LLMs to generate inputs triggering issues in suspicious code
+22
+WASPS | Architecture
+23
+Static Analysis
+Run Dynamic Bug Oracles
+LLM Code Generation
+24
+Loading Code Base Into LLMs
+Good Idea?
+25
+• Intercept build with libear
+• Parse code with clang
+• Keep track of what Symbols the LLM-Agent has seen
+• to know their position (File, line, column)
+• Communicate via LSP (to support multiple languages)
+
+LLMs und Code Interactions
+Reminder: Limited Context, LLMs easy to distract
+LSP-Based Tools to Interact with Code Base
+○ getDefinition(SymbolName s)
+○ findReferences(SymbolName s)
+○ updateDefinition(SymbolName s, Code newCode)
+○ testPatch()
+■ run unit tests
+■ run against reproducer
+■ run against reproducer mutations if you are feeling fancy
+27
+More Complexity Under the Hood
+Patching
+● Finding the issue is just the first step
+● Ultimate goal is avoiding vulnerabilities and apply patches
+Handling Binary Data
+● LLMs are bad in producing binary data structures but good in producing code
+● Generate transformation code which exports binary data
+Combine with Fuzzing
+● In the presented loop only bug oracles from dynamic analysis were used
+● Will we get better results when combined with fuzzing?
+28
+29
+What happened in Vegas…
+Results
+30
+With replayed challenge after the fact
+Vul = Potential Vulnerability, Ver = Successful Verifier
+Try It / Watch Video for More Anecdotes
+https://github.com/WASP-SYSTEMS/wespenstock
+31
+https://media.ccc.de/v/39c3-von-fuzzern-zu-age
+nten-entwicklung-eines-cyber-reasoning-system
+s-fur-die-aixcc#l=eng (German + English)
+Outlook
+32
+Numerous Further Approaches to Tackle this Problem
+All Teams Opted to mix LLMs with Static + Dynamic Analysis
+Numerous Approaches
+● Integrate LLMs into Fuzzing Loop vs. Integrate Fuzzing into LLMs
+● Generate Dictionaries / Partial Inputs
+● Generate Grammars
+● Extend Bug Oracles to be more sensitive
+33
+Interested?
+34
+Approach Christian, Mischa Meier, Me or anyone on the WASPS picture
+Modules:
+MA-INF 3319 Lab Usable Security and Privacy
+MA-INF 3320 Lab Security in Distributed Systems
+Topics on
+https://www.besec.uni-bonn.de/teaching/lab-seminar-projektgruppen-themen
+(will be updated on 09.02.)

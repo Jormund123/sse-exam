@@ -1,0 +1,1293 @@
+Exercise 1
+---
+Ex. 1 - Terms & Relations
+a) Relationship between threat and adversary:
+- A threat is a potential cause of an unwanted incident, which may result in harm to a
+system or organization
+- An adversary is any person or thing that acts (or has the power to act) to cause,
+carry, transmit, or support a threat
+- Relationship: The adversary is the actor/entity that carries out, enables, or supports
+the threat
+b) Differentiation between safety and security:
+- Safety: Absence of catastrophic consequences on the user(s) and the environment;
+deals with risks arising FROM the system and potentially impacting the environment;
+addresses accidental risks
+- Security: Concerned with risks originating FROM the environment and potentially
+impacting the system; addresses malicious risks
+- Key difference: Direction of risk (system→environment vs. environment→system) and
+intent
+(accidental vs. malicious)
+c) Problem with absolute statements like "[software] is secure":
+- Security definition depends on many factors and is specific to a given system
+- Such statements are "shady" without providing the assumptions they rely on
+- Typical security proofs work by reduction to assumptions that haven't been refuted
+yet
+- Often the underlying assumptions are too weak to draw such conclusions
+- Security is very hard to quantify
+- Beware of marketing promises!
+d) Difference between attack vector and vulnerability:
+- Attack vector: A path or means by which an attacker can gain access to a computer
+or network
+server to deliver a malicious outcome
+- Vulnerability: A weakness of an asset (or control) that can be exploited by one or
+more threats
+- Difference: Attack vector is the "how/route" while vulnerability is the "weakness" that
+enables
+the attack
+e) CIA stands for:
+- Confidentiality: Information is not made available or disclosed to unauthorized
+individuals,
+entities, or processes
+- Examples to achieve: Encryption, access controls, authentication mechanisms
+- Integrity: Safeguarding the accuracy and completeness of assets
+- Examples to achieve: Checksums, digital signatures, version control
+- Availability: Being accessible and usable upon demand by an authorized entity
+- Examples to achieve: Redundancy, backups, DDoS protection, load balancing
+f) AAA Principle:
+- Authentication: Provision of assurance that a claimed characteristic of an entity is
+correct
+(verifying "who you are")
+- Example: Passwords, biometrics, certificates
+- Authorization: A right or permission granted to a system entity to access a system
+resource
+(verifying "what you can do")
+- Example: Access control lists, role-based permissions
+- Accountability/Auditability/Non-Repudiation: Ability to prove the occurrence of a
+claimed event
+or action and its originating entities
+- Example: Logging, audit trails, digital signatures
+---
+Ex. 2 - Software Security
+a) 3 things that make up software security:
+1. People: Individuals need security awareness; low awareness leads to mistakes that
+cause
+security issues
+2. Processes: Proper procedures ensure controlled, effective, and timely security
+activities;
+poor processes lead to random/inconsistent behavior
+3. Technology: Proper technical implementation; poor technology leads to exploitable
+vulnerabilities
+b) Why security is not just about technology:
+- People with low security awareness make mistakes leading to security issues (e.g.,
+falling for
+phishing, poor password practices)
+- Poor processes lead to random behavior, hindering controlled and effective security
+activities
+- Security is a continuous challenge for everyone in an organization, not just
+developers—all
+stakeholders must be involved
+- Even the best technology fails if people misuse it or processes don't support secure
+practices
+c) Security Maturity Models:
+Purpose: To assess the maturity of software development security practices (similar to
+SPICE/CMMI
+for general software development)
+OWASP SAMM Levels:
+- Level 0: Implicit starting point - activities/practices are unfulfilled
+- Level 1: Initial understanding and ad-hoc provision of security practices
+- Level 2: Increased efficiency and/or effectiveness of security practices
+- Level 3: Comprehensive mastery of security practices at scale
+---
+Ex. 3 - Vulnerability of the Day (CSRF)
+Note: The lecture covered CSRF generally and mentioned CVE-2012-0453 (Bugzilla
+CSRF
+the
+vulnerability). For the exercise, you should research a different CSRF example. Here's
+framework based on the lecture content:
+What is CSRF:
+Cross-Site Request Forgery exploits web applications that accept state-modifying
+requests without
+the user's
+behalf.
+proper user authentication. Any web page in the same browser can make requests on
+Example from lecture (CVE-2012-0453):
+- What happened: Bugzilla 4.0.2-4.0.4 and 4.1.1-4.2rc2 had a CSRF vulnerability in
+xmlrpc.cgi
+that allowed remote attackers to hijack authentication for requests to modify product
+installations via the XML-RPC API
+- How it happened: When mod_perl was used, the application allowed arbitrary users
+to make
+requests that modify the product's installation without verifying the request origin
+- How it was dealt with: Implementing proper CSRF tokens to validate that requests
+originate from
+legitimate users
+CIA Properties Affected:
+- Integrity: ✓ (Primary) - Unauthorized modifications could be made to user accounts or
+application data
+- Availability: ✓ (Potential) - If accounts are deleted or disabled
+- Confidentiality: ✗ (Not directly affected) - CSRF doesn't expose information; it causes
+unwanted actions
+Mitigation:
+- Use pseudo-random tokens (nonces) embedded in forms or cookies
+- Verify tokens when requests are received at the server
+- Use POST instead of GET for state-changing operations (though this alone is
+insufficient)
+---
+Exercise 2
+---
+Ex. 1 - STRIDE
+a) What does STRIDE stand for?
+STRIDE is an acronym for six categories of security threats:
+- Spoofing
+- Tampering
+- Repudiation
+- Information Disclosure
+- Denial of Service
+- Elevation of Privilege
+b) Explain what the STRIDE properties are:
+┌───────────────┬───────────────────────┬
+────────────────────────────────┬
+──────────────────────┐ │ Threat │ Definition │ Security Property Threatened │ Example │
+├───────────────┼───────────────────────┼
+────────────────────────────────┼
+──────────────────────┤
+│ │ Pretending to be │ │ IP Spoofing, E-
+Mail │ │ Spoofing │ something or someone │ Authentication │ Spoofing, Phishing │ │ │ other than yourself │ │ │
+├───────────────┼───────────────────────┼
+────────────────────────────────┼
+──────────────────────┤
+│ │ Modifying something │ │ Web tampering, │ │ Tampering │ on disk, on a │ Integrity │ changing │ │ │ network, or in memory │ │ prices/offers │
+├───────────────┼───────────────────────┼
+────────────────────────────────┼
+──────────────────────┤
+│ │ Claiming you didn't │ │ Deleting logs, "I │ │ Repudiation │ do something, or were │ Non-repudiation/Accountability
+│ did not order this │ │ │ not responsible │ │ product" │
+├───────────────┼───────────────────────┼
+────────────────────────────────┼
+──────────────────────┤
+│ Information │ Providing information │ │ Heartbleed bug │ │ Disclosure │ to someone not │ Confidentiality │ leaking server │ │ │ authorized to see it │ │ memory │
+├───────────────┼───────────────────────┼
+────────────────────────────────┼
+──────────────────────┤
+│ Denial of │ Absorbing resources │ │ DDoS attacks (e.g., │ │ Service │ needed to provide │ Availability │ Dyn DNS attack 2016) │ │ │ service │ │ │
+├───────────────┼───────────────────────┼
+────────────────────────────────┼
+──────────────────────┤
+│ Elevation of │ Allowing someone to │ │ ImageMagick │ │ Privilege │ do something they're │ Authorization │ "ImageTragick" │ │ │ not authorized to do │ │ vulnerability │
+└───────────────┴
+┴
+───────────────────────
+┴
+────────────────────────────────
+──────────────────────┘
+---
+Ex. 2 - Misuse and Abuse
+a) What is the difference between a misuse and an abuse case?
+┌────────┬─────────────────────────────────┬
+──────────────────────────────────┐ │ Aspect │ Misuse Case │ Abuse Case │
+├────────┼─────────────────────────────────┼
+──────────────────────────────────┤
+│ Intent │ Unintentional │ Intentional │
+├────────┼─────────────────────────────────┼
+──────────────────────────────────┤
+│ Nature │ Crime of opportunity │ Actively seeking vulnerabilities │
+├────────┼─────────────────────────────────┼
+──────────────────────────────────┤
+│ Actor │ Legitimate user making mistakes │ Malicious actor (black/grey hat) │
+└────────┴
+┴
+─────────────────────────────────
+──────────────────────────────────┘
+b) Example scenario where both can occur:
+Scenario: Online Banking System - Fund Transfer
+Misuse Case:
+- A legitimate user accidentally enters a wrong account number when
+transferring funds
+- The system displays the recipient's full name and account details for
+confirmation
+- The user unintentionally sees personal information of a stranger
+- Why misuse: The user did not intend to access this information; it was
+an accidental typo
+- Harm: Confidentiality breach of the other customer's data
+Abuse Case:
+- An attacker systematically enters different account numbers to harvest
+customer names and
+account details
+- They use a script to enumerate thousands of accounts
+- Why abuse: The attacker intentionally exploits the confirmation feature to
+collect personal
+data
+- Harm: Large-scale information disclosure, potential identity theft
+preparation
+---
+Ex. 3 - Vulnerability of the Day (SQL Injection)
+Example: The TalkTalk Data Breach (2015)
+What happened:
+- In October 2015, UK telecommunications company TalkTalk suffered a
+major data breach affecting
+approximately 157,000 customers
+- Personal data including names, addresses, dates of birth, phone
+numbers, email addresses, and
+in some cases bank account details and sort codes were stolen
+How it happened:
+- Attackers exploited SQL injection vulnerabilities in TalkTalk's legacy web
+pages
+- The vulnerable pages were inherited from an acquired company and had
+not been properly secured
+- Attackers injected malicious SQL queries through web forms to extract
+database contents
+How it was dealt with:
+- TalkTalk notified affected customers and offered free credit monitoring
+- The company faced a record GBP 400,000 fine from the UK Information
+Commissioner's Office (ICO)
+- Security patches were implemented, and the company invested in
+upgrading legacy systems
+- Three teenagers were arrested and prosecuted for the attack
+CIA Properties Affected:
+- Confidentiality: Customer personal and financial data was exposed to
+unauthorized parties
+- Integrity: While primarily a data theft, the attack demonstrated attackers
+could potentially
+modify data
+- Availability: The website was taken offline during the incident response,
+and customer trust (a
+form of service availability) was severely damaged
+Exercise 3
+Ex. 1 - Risk Analysis
+a) What to keep in mind for architectural risk analysis (at least 4 things):
+Based on the lecture (slides 19-20), here are key considerations:
+1. Teamwork is essential - Risk analysis should be a collaborative effort involving multiple
+stakeholders
+2. Timing matters - Discuss security risk once most of the architecture is settled, but early
+enough to make changes
+3. Focus on design flaws over code-level vulnerabilities - Architectural decisions have
+bigger impact
+4. A few good early decisions go a long way - Incorporating encryption, authentication &
+access control, and technology choices at the right places
+5. Answer key questions: What are potential threats? What are my assets? Who would/can
+attack me?
+6. Distinguish must-haves from nice-to-haves at the design level
+7. Document everything - Create starting point for documentation and further security
+actions
+b) Three sections of threat modeling:
+From slide 21:
+1. Determine threats
+- Identify entry/exit points
+- Identify trust boundaries
+- Identify threats
+2. Rate threats
+- Identify most probable threats
+- Identify most critical threats
+3. Determine countermeasures
+- Identify solutions to mitigate threats
+- Document non-mitigated threats
+c) Trust boundaries in the SePA system:
+Based on the diagram and lecture content (slides 24-25), I would set trust boundaries at:
+1. Between Patient/Card Reader Terminal and Doctor's Office network
+- Why: The patient card is an external entity that could be compromised or contain
+malicious data. The card reader acts as the entry point from untrusted external entities.
+2. Between Doctor's Office and the VPN/DataProvider (Internet boundary)
+- Why: This is explicitly shown as "Authenticate, Forward Read and Write requests" with
+VPN. This crosses from a potentially less secure doctor's office network to the secure
+SePA-VPN.
+Data crossing machine boundaries should not be trusted.
+3. Between the Card Reader Terminal and the Office PC
+- Why: The terminal acts as a secure gateway. All requests must pass through it, and it
+validates the doctor's chip card. This prevents the Office PC from directly accessing the
+VPN
+without proper authentication.
+4. Implicit boundary: Between PatientDataService and PatientDataDB
+- Why: While they're in the same DataProvider zone, the database should only trust queries
+from the service layer, not direct client access. This implements defense in depth.
+Key reasons for these boundaries:
+- Control and validate data from untrusted sources (patient cards, doctor's PCs)
+- Enforce authentication and authorization at critical points
+- Implement the principle of least privilege
+- Protect sensitive patient data at rest and in transit
+d) Why are threat models and architectures different?
+From slide 38:
+Architecture diagrams depict subsystems responsibility:
+- Show what components exist and what each is responsible for
+- Focus on how the system works
+- Answer: "What does this system do?"
+Threat models are security focused:
+- Based on data flows rather than functional responsibilities
+- Name and characterize data that will be transported from one part to another
+- Iteratively mitigating risks
+- Answer: "How could the system be attacked?"
+Key differences:
+- Scope: Architecture may show one big component, but threat model might decompose it
+further for security analysis - Purpose: Architecture is
+about functionality; threat model is about security
+- Granularity: Small features in architecture might be entire processes in threat models
+- Big architectures may end up being one big bubble in architecture but need detailed
+decomposition for threat modeling
+Ex. 2 - Distrustful Decomposition
+From slides 44-47, the aspects of Distrustful Decomposition are:
+1. Decompose into separate processes with separate permissions
+- Use fork() to create separate OS processes, NOT threads
+- Why threads don't work: Threads share memory, so compromise of one thread can affect
+others - Why important: Each process can run
+with only the permissions it needs (Principle of Least Privilege)
+2. Communicate via Inter-Process Communication (IPC)
+- Use proper IPC mechanisms (pipes, sockets, signals, files, etc.)
+- Why important: Forces explicit, controllable communication channels between
+components. Makes it easier to validate and sanitize data exchanges.
+3. Each process distrusts the other
+- Validate input from other processes
+- Re-check credentials and integrity mechanisms
+- Why important: Implements defense in depth. Even if one component is compromised, it
+cannot easily compromise others because each component validates data independently.
+4. Simplify root-level subsystems to an extreme extent
+- Keep privileged code as small and simple as possible
+- Move complex functionality to unprivileged processes
+- Why important: Reduces attack surface of privileged code. If complex code has
+vulnerabilities, the attacker only gets unprivileged access.
+Overall importance (from slide 44):
+- Complex code gets sandboxed → reduces impact of exploits
+- More security checks incorporated throughout the code
+- Incorporate distrust at the architecture level - makes security a fundamental design
+principle, not an afterthought
+Example from lecture: Qmail (slides 48-49)
+- Small components that need root: SMTP listening and sending (very simple)
+- Larger components with user permissions: Queue management, CLI processing, error
+handling, configuration
+- If vulnerability exists in complex parts, attacker doesn't get root access
+Counter-example: Stagefright (slides 51-54)
+- Process for thumbnail generation ran with high privileges
+- Buffer overflow → arbitrary code execution with high privileges
+- Lesson: Separate complex, non-root functionality from root-privileged operations
+Ex. 3 - Vulnerability of the Day (XSS Example)
+I'll provide a well-documented XSS example not discussed in the lecture:
+Twitter XSS Worm (2010) - "Onmouseover" Worm
+What happened:
+On September 21, 2010, a self-propagating XSS worm spread rapidly across Twitter,
+affecting thousands of users including high-profile accounts like Sarah Brown (wife of UK
+Prime
+Minister).
+How it happened:
+1. Vulnerability: Twitter failed to properly sanitize the onmouseover JavaScript event
+handler in tweets
+2. Attack vector: Attacker crafted a tweet containing malicious JavaScript in an
+onmouseover attribute
+3. Exploitation: When users simply hovered their mouse over the malicious tweet, the
+JavaScript executed automatically
+4. Self-propagation: The malicious script automatically retweeted itself from infected
+accounts, creating a worm effect
+Example payload (simplified):
+<script>
+onmouseover="/* malicious code here */"
+</script>
+The worm could:
+- Auto-retweet itself
+- Redirect users to phishing sites
+- Steal session cookies
+- Post tweets on behalf of the user
+How it was dealt with:
+1. Immediate response: Twitter quickly identified the vulnerability (within hours)
+2. Mitigation: Implemented proper input sanitization and output encoding
+3. Fix: Updated their XSS filters to block onmouseover and other event handlers
+4. Cleanup: Removed malicious tweets and notified affected users
+CIA Properties Affected:
+1. Confidentiality - Compromised ✗
+- Session cookies could be stolen
+- User authentication tokens potentially exposed
+- User behavior/activity disclosed through forced actions
+2. Integrity - Severely Compromised ✗
+- Unauthorized tweets posted from user accounts
+- User profiles potentially modified
+- Trust in displayed content violated (tweets not actually from the claimed user)
+3. Availability - Partially Compromised ✗
+- While Twitter remained online, the flood of malicious retweets created noise
+- Users couldn't trust the platform during the incident
+- Some users may have logged out or stopped using Twitter temporarily
+Type of XSS: This was a Stored (Persistent) XSS attack because:
+- The malicious script was stored in Twitter's database
+- It was delivered to users whenever they viewed tweets
+- No direct user interaction was needed beyond hovering (making it particularly
+dangerous)
+Key lesson: Always sanitize user input and properly encode output, especially for event
+handlers and JavaScript contexts. This incident demonstrates how a seemingly minor
+oversight
+(allowing onmouseover) can have widespread impact on a large platform.
+Exercise 4
+Ex. 1 - Risk Assessment
+a) How is risk calculated? What is important to be kept in mind?
+Risk Calculation:
+- Risk(incident) = p(occurrence) × impact
+Important points to keep in mind:
+- Humans tend to over/underestimate risks (difference between analytical risk
+assessment and human risk perception)
+- Not every vulnerability will be exploited: p(occurrence) ≠ p(vulnerability)
+- p(occurrence) is increased by:
+- More vulnerabilities
+- Far-reaching vulnerabilities
+- Discoverable vulnerabilities
+- Scope of the project
+- Market share/exposure
+- Assessing the change in risk is more sound than absolute numbers
+- Risk depends on context (e.g., smart fridge vs. weapons manufacturing plant)
+b) Account Risk Assessment Examples
+Important Account (e.g., University/Work Email):
+- Assets: Access to sensitive documents, personal information, professional
+communications,
+password reset links for other accounts
+- p(occurrence): Medium - targeted phishing attacks, credential stuffing
+- Impact: High - could compromise academic/work data, identity theft, access to other
+linked accounts
+- Risk: HIGH (medium × high)
+Less Important Account (e.g., Gaming Forum):
+- Assets: Username, forum posts, maybe gaming statistics
+- p(occurrence): Low-Medium - less targeted, mostly automated attacks
+- Impact: Low - limited personal information, no financial data
+- Risk: LOW (low-medium × low)
+c) Differences between Abuse Cases and Risk Assessment
+Ex. 2 - Protection Poker
+Here's a completed Protection Poker assessment for an employee management system:
+Feature Assessment Table:
+Let me add a third feature: "Employee payroll processing"
+Feature #: 1
+Feature: Work group
+Total Value Points: 21 (3+2+3+13)
+Ease Points: 5
+Security Risk: 105
+────────────────────────────────────────
+Feature #: 2
+Feature: Change of employee personal information
+Total Value Points: 179 (3+8+34+5+8+55+21+8+2+3)
+Ease Points: 8
+Security Risk: 1,432
+────────────────────────────────────────
+Feature #: 3
+Feature: Employee payroll processing
+Total Value Points: 67 (2+3+13+34+2+13)
+Ease Points: 13
+Security Risk: 871
+Based on assessment: Feature 2 (Change of employee personal information) has the
+highest security risk (1,432), as it involves access to the most sensitive assets including
+banking info, SSN, and insurance info, with moderate ease of attack.
+---
+Ex. 3 - Risk-Driven Test Planning (RDTP)
+a) Goals of RDTP
+1. Mitigate negative impact on the customer
+2. Create mitigation strategies early in the development process
+3. Allow "disruption-free" usage of the product
+4. Focus testing efforts on areas with:
+- High impact on business due to failure
+- High likelihood of failure in production
+5. Fail fast - identify critical issues early
+b) Top-Down Test Planning
+Process: Goals → Risks → Indicators → Tests
+Steps:
+1. Start with broad domain analysis:
+- Define Goals (overall objectives, business/user-focused, constraints, availability)
+- Identify Assets (domain-specific, domain-independent, intangible properties)
+2. Goals → Risks:
+- Identify high-level risks that directly map to 1+ goals
+- Influenced by both p(vulnerability) & assets
+- Product has finite number of high-level risks
+3. Risks → Indicators:
+- Define measurable outcomes showing risk manifestation
+- What is the poor behavior?
+- What are potential underlying causes?
+- E.g., downtime, asset exposure
+4. Indicators → Tests:
+- Create specific test expectations
+- Ensure indicators are avoided or satisfied
+Characteristics:
+- "Forest-level" analysis
+- Vulnerability-focused
+- Move on when vulnerability is found
+- Valued assets given priority
+Benefits: Tied to specific goals
+Drawbacks: May be incomplete within categories, "check-off-the-list" syndrome
+c) Bottom-Up Security Test Planning
+Steps:
+1. Write down many tests (short form, seeds)
+2. Group tests into categories:
+- By assets
+- By functionality
+- By CIA consequences
+- By team requirements
+3. Revise categories as a group:
+- Are groups missing?
+- Are tests missing in groups?
+4. Add more tests to each category
+Characteristics:
+- Start with specific tests, build up to categories
+- "Tree-level" analysis
+Benefits: Freedom to write best tests immediately
+Drawbacks: Easy to miss entire goals/categories/assets, requires security expertise
+upfront
+---
+Ex. 4 - Vulnerability of the Day
+Log Overflow Example: CVE-2013-0231
+What happened:
+The pciback_enable_msi function in the PCI backend driver in Xen for Linux kernel 2.6.18
+and 3.8
+allowed guest OS users with PCI device access to cause a denial of service via a large
+number of
+kernel log messages.
+How it happened:
+- Attackers could flood the system with PCI-related requests
+- Each request generated kernel log messages
+- No limits on log message generation
+- Eventually filled disk space or caused system slowdown
+How it was dealt with:
+- Patch implemented rate limiting on kernel log messages
+- Added bounds checking for PCI operations
+- Implemented log rotation with size limits
+CIA Impact:
+- Availability: HIGH - System could become unresponsive or crash
+- Confidentiality: LOW - Could potentially overwrite old logs containing evidence
+- Integrity: LOW - System behavior compromised
+Path Traversal Example: CVE-2009-2902
+What happened:
+Directory traversal vulnerability in Apache Tomcat 5.5.0 through 5.5.28 and 6.0.0 through
+6.0.20
+in a
+allowed remote attackers to delete work-directory files via directory traversal sequences
+WAR filename.
+How it happened:
+- Application constructed file paths by concatenating user input (WAR filename) with base
+directory
+- No proper validation of "../" sequences
+- Example: malicious.war containing ../../../etc/passwd in filename
+- Attacker could access files outside intended directory
+How it was dealt with:
+- Input validation: Check and sanitize filenames
+- Path canonicalization verification
+- Restrict file access to allowed folders only
+- Updated to use secure file handling APIs
+CIA Impact:
+- Confidentiality: HIGH - Could read sensitive files outside web root
+- Integrity: HIGH - Could delete or modify critical system files
+- Availability: MEDIUM - Could delete files needed for system operation
+Exercise 5
+Ex. 1 - Defensive Coding
+a) How is defensive coding different from risk analysis and secure design?
+Based on slides 20-22:
+Risk Analysis:
+- Focuses on domain, assets, threats, and what-ifs
+- Global-minded approach
+- Prioritization is critical
+Secure Design:
+- Minimizes attack surface
+- Applies principle of least privilege
+- Implements defense in depth
+- Determines ideal orchestration of security components (where to use crypto, access
+control,
+etc.)
+Defensive Coding:
+Addresses two main issues:
+1. Code must follow the secure architecture: One small change in code can lead to big
+changes in
+risk analysis (e.g., storing passwords in Customer table vs. Users table, allowing file
+uploads)
+2. Code must be free of internal weaknesses: Avoiding VOTDs (Vulnerabilities of the Day),
+requiring specific knowledge of security programming pitfalls in the programming
+language at hand
+b) What are the defensive coding principles?
+From slide 23:
+- Writing insecure code is surprisingly easy - mysterious coding assumptions, many
+different
+technologies to know
+- Maintainability still counts - duplicate code is even harder to secure; vulnerabilities often
+have regressions and incomplete fixes
+- Know your APIs! - misusing an API in the wrong context can be a vulnerability (e.g., an
+XML
+parser that also executes includes); don't copy from Internet examples without
+understanding
+- Don't be paranoid - know what you can trust, but don't trust StackOverflow or ChatGPT
+blindly
+- We should always code defensively
+Ex. 2 - Complexity
+From slide 24, "Complexity is the enemy of security" means:
+Structural Complexity:
+- Lots of interconnected subsystems → Architectural complexity
+- Lots of if's & loops → Cyclomatic complexity (McCabe)
+Cognitive Complexity:
+- Lack of understanding → Mistakes (vulnerabilities)
+- "How much do I have to think about how this feature works?"
+- Subjective but important
+Complexity in inputs → big security risks:
+- e.g., apps to operating systems
+- e.g., pages to web browsers
+The more complex a system is, the harder it becomes to:
+- Understand all execution paths
+- Test thoroughly
+- Audit for security issues
+- Maintain securely
+Complex code creates more hiding places for bugs and vulnerabilities, making it easier for
+security flaws to slip through.
+Exercise 6
+Exercise 1 - Code Quality and Security Practices
+a) Code Smells and Security
+What is a code smell?
+A code smell is a pattern in code that makes it less readable and maintainable. Code
+smells don't
+necessarily mean the code is broken, but they indicate potential problems that could lead
+to
+bugs or security vulnerabilities.
+Why it matters for security:
+Increased readability and changeability make security issues easier to find and fix.
+Complex,
+poorly structured code is more likely to hide vulnerabilities that attackers can exploit.
+Two examples with refactorings:
+1. Long Method (Code Smell)
+- Problem: Methods that are too long (hundreds of lines) are hard to understand, test, and
+review for security issues
+- Refactoring: Extract Method - Break the long method into smaller, focused methods
+with clear
+purposes
+- Security benefit: Smaller methods are easier to audit for vulnerabilities and understand
+data
+flow
+2. Improper Naming (Code Smell)
+- Problem: Variables/functions with unclear names (e.g., data, tmp, process()) make it
+hard to
+understand what data is trusted or sanitized
+- Refactoring: Rename - Use descriptive names that indicate purpose and trust level (e.g.,
+sanitizedUserInput, validateAndParseRequest())
+- Security benefit: Clear naming helps identify when untrusted data flows into sensitive
+operations.
+b) Test-Driven Development (TDD) Cycle
+The TDD Cycle:
+1. Write a failing test (Red) - Write a test for the next small piece of functionality before
+implementing it
+2. Make the test pass (Green) - Write the minimum code necessary to make the test pass
+3. Refactor (Blue) - Clean up the code while keeping tests passing
+Key principles:
+- Do not write more production code than necessary to make the test pass
+- Don't go for the goal - avoid the central behavior as long as possible
+- Break tasks into small, manageable pieces
+Security benefits of writing tests before implementation:
+1. Bugs are easier to fix - Functionality tests exist that will immediately catch when
+something
+breaks
+2. Security requirements as tests - Some security requirements can be translated into
+tests
+(e.g., "user cannot access other user's data")
+3. Prevention of bugs - Some types of bugs are never created in the first place because the
+test-first approach forces you to think about edge cases
+4. API clarity - Tests serve as documentation showing how to correctly use functions,
+reducing
+API misuse
+5. Test coverage - TDD naturally leads to 100% test coverage, making it harder for
+vulnerabilities to hide in untested code paths
+c) printf(str) vs printf("%s", str) Vulnerability
+Why it's a vulnerability:
+printf(str) treats user-controlled input as a format string, creating an Uncontrolled Format
+String vulnerability (CWE-134).
+The problem:
+When user input is passed directly as the format string to printf-family functions, attackers
+can
+inject format specifiers like %x, %s, or %n to:
+- Read memory using %x (prints hex values from the stack)
+- Write arbitrary values using %n (writes the number of bytes printed so far to a memory
+address)
+How to exploit it:
+char *str = user_input;
+printf(str); // VULNERABLE
+Attack examples:
+1. Memory Read:
+Input: "%x.%x.%x.%x"
+Output: bffff7a0.0.252.804a008
+(Leaks stack memory addresses)
+2. Memory Write:
+Input: "AAAA%08x.%08x.%08x.%n"
+(Writes the value into the address specified by AAAA)
+Proper mitigation:
+printf("%s", str); // SECURE - str is treated as data, not format
+This explicitly sets the format string, making user input treated as data rather than code.
+---
+Exercise 2 - Static Analysis
+b) Four Core Elements of Taint Analysis
+Taint analysis tracks how "contaminated" (untrusted) data flows through a program to
+dangerous
+operations.
+The four core elements:
+1. Sources
+- Input locations with potentially dangerous data
+- Examples: User inputs, HTTP parameters, file reads, environment variables, database
+queries
+- These mark where "taint" enters the system
+2. Sinks
+- Critical functions that could be exploited if they receive tainted data
+- Examples: SQL query execution (executeQuery), OS command execution (system), file
+operations, eval functions
+- These are the dangerous destinations we want to protect
+3. Propagation
+- Tracking how tainted data flows through the program
+- Follows data through variable assignments, function calls, and transformations
+- Maintains the "taint" as data moves through intermediate steps
+4. Sanitizers
+- Cleansing functions that remove the taint
+- Examples: Input validation functions, prepared statements, escaping functions
+- These break the taint chain by making data safe
+Visual flow:
+[Source] → [Propagation steps] → [executeQuery()] → [Sink]
+(input) (tainted variable) (vuln. call)
+If tainted data reaches a sink without passing through a sanitizer, it's flagged as a potential
+vulnerability.
+c) SAST Application Phases in SDLC
+SAST can be applied at multiple phases:
+Phase 1: During Coding (IDE Integration)
+Timing: Real-time as developer writes code
+Pros:
+- Immediate feedback (seconds)
+- Cheapest to fix (before code is committed)
+- Educational - teaches developers secure coding
+- Prevents vulnerabilities from entering codebase
+Cons:
+- May slow down development workflow
+- Can be distracting with too many warnings
+- Limited to files currently open
+Phase 2: Code Review / Pre-Commit
+Timing: Before code is merged to main branch
+Pros:
+- Automated security review before human review
+- Catches issues before they enter main codebase
+- Can enforce security policies (block merge on high severity)
+- Full project context available
+Cons:
+- Later than IDE phase (more expensive to fix)
+- May slow down PR review process
+- Can create friction if too many false positives
+Phase 3: CI/CD Pipeline (Automated Build)
+Timing: During automated builds/tests
+Pros:
+- Fully automated, no manual trigger needed
+- Consistent analysis on every build
+- Can gate deployments based on findings
+- Generates metrics and trends over time
+Cons:
+- Even later in process (more expensive to fix)
+- Can break builds, blocking entire team
+- Slower feedback loop than IDE/review
+Phase 4: Periodic Security Audits
+Timing: Scheduled scans of entire codebase
+Pros:
+- Comprehensive view of security posture
+- Can use more expensive/thorough analysis
+- Catches issues in legacy code
+Cons:
+- Very late discovery (most expensive to fix)
+- Issues may already be in production
+- Infrequent, not preventative
+Best Practice: Use SAST at multiple phases - quick checks in IDE, comprehensive checks
+in CI/CD.
+d) Linter vs Full Static Analysis Tool
+Linter:
+- Focus: Code style, formatting, simple patterns
+- Depth: Surface-level, syntactic checks
+- Examples: ESLint, Pylint, RuboCop
+- Checks:
+- Naming conventions
+- Code formatting (indentation, spacing)
+- Simple anti-patterns (unused variables, missing semicolons)
+- Basic code smells
+- Analysis: Fast, local to single file or small scope
+- Configuration: Highly configurable style rules
+Full Static Analysis Tool (SAST):
+- Focus: Security vulnerabilities, complex bugs
+- Depth: Deep semantic analysis, data flow tracking
+- Examples: Semgrep, SonarQube, CodeQL, Coverity
+- Checks:
+- Injection vulnerabilities (SQL, XSS, command injection)
+- Taint analysis (sources → sinks)
+- Authentication/authorization issues
+- Cryptographic misuse
+- Race conditions
+- Memory safety issues
+- Analysis: Slower, cross-file/whole-program analysis
+- Configuration: Security-focused rulesets (OWASP, CWE)
+Key Difference: Linters check how code is written (style); SAST checks what code does
+(security/correctness).
+Exercise 7
+Ex. 1 - Code Scanning Fundamentals
+a) Three types of graphs combined into a Code Property Graph (CPG):
+1. Abstract Syntax Tree (AST)
+- What it captures: Program structure, types, and semantics. Enables pattern matching for
+bug/vulnerability detection.
+- Limitation: Shows structure but not execution order → cannot determine which execution
+paths are reachable to specific statements like sink(y).
+2. Control Flow Graph (CFG)
+- What it adds: Execution paths and control flow. Shows all possible execution sequences
+from entry to exit, including which statements can follow which and how control flows
+through branches and loops.
+- Limitation: Doesn't provide data dependencies → we can see that sink(y) can execute, but
+not that y is derived from x which came from source().
+3. Program Dependence Graph (PDG)
+- What it adds: Data and control dependencies. Tracks both value propagation (data edges
+like D_x, D_y) and conditional execution (control edges like C_true).
+- Enables: Following tainted data from untrusted sources to dangerous sinks, and program
+slicing to answer "what affects this sink?" or "what does this source affect?"
+b) Difference between SAST and DAST:
+SAST (Static Application Security Testing):
+- Analyzes source code without executing the program
+- Advantage: Can be used early in the SDLC, provides exact code locations where
+vulnerabilities exist, doesn't require a running system
+- Disadvantage: Can produce false positives, struggles with dynamic code features
+(reflection, dependency injection), the more abstract the code, the worse it performs
+DAST (Dynamic Application Security Testing):
+- Black-box testing that attacks a running system from outside and observes its behavior
+- Advantage: No source code required / language-agnostic, significantly lower false
+positives with concrete exploit inputs, checks actual production configuration
+- Disadvantage: Requires a running system, simple code constructs can confuse DAST,
+requires good API documentation, no defined endpoint (unclear when to stop testing)
+c) Fuzzing and its two main components:
+Fuzzing is a dynamic testing technique that sends mutated/malformed inputs to a system
+to trigger unexpected behavior and discover vulnerabilities.
+Two main components:
+1. Input Generation / Fuzzing:
+- Generates test inputs through:
+- Mutated inputs (altering benign test data)
+- Payload variations
+- Boundary value cases
+- Adding randomness
+- Applying attack heuristics
+2. Bug Detection / Observing System Under Test:
+- Monitors the system for anomalous behavior:
+- Crashes
+- Timeouts
+- Error messages
+- Data flow anomalies
+- Uses bug detectors to identify vulnerabilities based on observed responses
+Exercise 08
+Ex. 1 - DOs and DON'Ts of Code and Connections
+a) Why secure connections need encryption, authentication, and tamper-proofing:
+Why needed:
+- Encrypted: Sent messages can only be read at communicating endpoints
+(confidentiality)
+- Authenticated: Both endpoints know for sure that they are communicating with the right
+counterparts (authentication)
+- Tamper-proof: Integrity checks assure that messages are received the way they were sent
+(integrity)
+How achieved:
+- Encryption: Two-step process for performance
+- Step 1: Use public-key-crypto to exchange a secret session key (must be generated with
+a secure PRNG!)
+- Step 2: Use session key to exchange symmetrically encrypted data
+- Authentication: Typically established by checking cryptographic certificates - certificate
+chain is validated up to some known "root of trust"
+- Integrity: Using hashing / message integrity code, sometimes combined with
+authentication in
+Message Authentication Codes (MAC)
+b) Problems with sanitizing data:
+- Must not forget about sanitization in general
+- Must not forget about individual characters to sanitize
+- Must sanitize the right data in the right way
+c) Why sanitization of debug/logging output is important:
+- Sanitization is useful not just for inputs, but also for outputs
+- Example: anonymization - in many cases data can be de-anonymized by correlating
+different data items
+- Therefore: Be extra cautious whenever giving out any data, including "anonymized data"
+- Related to fields like "differential privacy" and "statistical disclosure control"
+Ex. 2 - Cryptography
+a) How symmetric encryption works:
+- Key structure: One key for both encryption & decryption → key must be kept secret
+- Modern algorithms: AES, Twofish, Blowfish
+- AES specifically: Fast, widely used (standardized by NIST in 2001), used for large data
+encryption (backups, hard drives), a block cipher
+- Tricky part: The key must be known by the decrypting party (only)
+- Possibilities: Pre-shared keys or secure key-exchange protocols
+b) How asymmetric encryption works:
+- Also called: Public-key encryption
+- Key structure: Every party has two keys:
+- Public key for others to encrypt data
+- Private key for oneself to decrypt it
+- Advantages: Solves problem of key exchange
+- Disadvantages: Relatively slow compared to symmetric encryption
+- Popular modern algorithm: RSA (>=4096 bit keylength)
+- Based on factorization of two prime numbers
+- Public/private keys generated from computing two very large prime numbers
+- Factoring primes is still hard, which is why RSA has not yet been cracked (but some
+implementations have!)
+- Alternative: ED25519 (Elliptic Curve)
+- Tricky Part: How to ensure that key pair belongs to the stated person?
+c) Stream cipher vs block ciphers:
+Stream Ciphers:
+- Key is transformed into a stream
+- Plaintext converted to ciphertext by xor-ing it with keystream
+Block Ciphers:
+- Split plaintexts into blocks of fixed sizes
+- Blockwise encryption
+- Quite efficient, can be parallelized
+- Question: How to (re)assemble the ciphertext blocks?
+- Mode of operation determines how to evolve key material from one block to the next, and
+how to re-assemble the blocks
+- Examples of modes:
+- ECB (Electronic Codebook - problematic, preserves patterns)
+- CBC (Cipher Block Chaining - uses Initialization Vector)
+- CTR (Counter)
+- GCM (Galois/Counter Mode)
+Ex. 3 - Message Authentication Codes (MAC) and Signatures
+a) How MACs work and what they're used for:
+How they work:
+- Computes a hash for a message using a symmetric key
+- Sender uses key to create MAC from message
+- Receiver uses same key to compute MAC and compares with received MAC
+- If MACs match: message is authentic and integrity is verified
+What they're used for:
+- Provide authentication in addition to integrity
+- Guarantee that the sender sent the message
+- Or: guarantee that it was us who wrote a file
+- Makes more sense in single-party scenarios (e.g., write a file to disk, create a MAC,
+validate when reading again)
+Types:
+- CMAC: Based on Block Ciphers (most often: AES in CBC Mode, called CBC-MAC)
+- HMAC (keyed Hashes): Based on Hashing Algorithms - key + message are being hashed
+together
+Tricky part: How to transmit the key (hence better for single-party scenarios where key can
+be kept secret)
+b) How signatures work and what they're used for:
+How they work:
+- Signature created with private key by hashing the message and "encrypting" the hash
+- Signature verified with public key by "decrypting" the received "encrypted" message and
+hashing
+the original message
+- Alice can sign with her private key, Bob can verify with Alice's public key
+What they're used for:
+- Provide non-repudiation, authentication, and integrity
+- Ensure identity of data and its sender
+- Example: JSON Web Tokens (JWT) - digitally signed tokens for authorization and
+information exchange
+Tricky Part: How to trust the public key? Solutions:
+1. Only trust keys you have personally received
+2. Web of Trust - one signs public keys one trusts
+3. Have trusted locations for public keys (e.g., key servers)
+4. Central authorities sign keys to guarantee their authenticity (certificates)
+Ex. 4 - RTFM
+a) Common alternatives to reading the manual:
+The lecture references research showing users tend to:
+- Try to figure things out themselves through trial and error
+- Look for quick examples rather than comprehensive documentation
+- Use online sources like StackOverflow (though this is NOT recommended for security
+libraries!)
+b) Why manuals were not used:
+- "No one actually does that" - research shows people don't read manuals
+- "No one has been doing it for decades" - this has been a persistent problem
+- Referenced papers:
+- David G. Novick and Karen Ward. 2006: "Why don't people read the manual?"
+- Alethea L. Blackler et al. 2014: "Life Is Too Short to RTFM: How Users Relate to
+Documentation and Excess Features in Consumer Products"
+c) What makes a good manual:
+When you create something that should be used by others:
+- Make it intuitive, as little overload as possible
+- If you have to write a manual: a really short manual which is targeted at your target
+audience,
+not at you
+- Give good examples
+- Use sane defaults
+Important note for security libraries:
+- Sadly, not many people create intuitive crypto libraries
+- You WILL still have to read the manual for security relevant libraries
+- You WILL still have to read the manual for non-security libraries if they impact your
+domain
+logic and can be exploited
+- But you can do a risk analysis on where you really need to dive deep into the docs
+Ex. 5 - Vulnerability of the Day
+I'll provide an example for hardcoded credentials that wasn't extensively discussed in the
+lecture:
+Example: CVE-2010-2073 - Pyftpd Hard-coded Credentials
+What happened:
+The file auth_db_config.py in Pyftpd 0.8.4 contained hard-coded usernames and
+passwords for three
+accounts: test, user, and roxon.
+How it happened:
+- Developers hardcoded credentials directly in the source code
+- Password: private static String adminPassword = "sesquipedalian";
+- The problem: passwords are stored as plaintext strings in the code
+- When compiled, these strings can be easily extracted from the bytecode using tools
+- Attackers can reverse engineer the code (obfuscation is NOT an option as attackers have
+time
+and are creative)
+How it was dealt with:
+- The vulnerability was disclosed through CVE
+- Mitigation strategies include:
+- Never store clear text passwords anywhere, only salted hashes
+- Store credentials in external files (not the code!) with proper permissions
+- Use environment variables or secure credential management systems
+CIA Properties Affected:
+- Confidentiality: VIOLATED - The hardcoded credentials were accessible to anyone who
+could read
+the code
+- Integrity: POTENTIALLY VIOLATED - Attackers with these credentials could modify
+arbitrary files
+- Availability: POTENTIALLY VIOLATED - Attackers could use the credentials to disrupt
+service
+Key Takeaway from Lecture:
+"You cannot keep secrets in your source code!" This applies to passwords, license keys,
+encryption keys, and any other sensitive information.
+---
+Alternative Example - Unsalted Hashes:
+Many data breaches have occurred where password databases used unsalted hashes,
+making them
+vulnerable to:
+- Rainbow table attacks: Precomputed lists of hashes
+- Dictionary attacks: Trying common passwords
+- Brute force attacks: Trying every possible password
+Solution: Salting
+- Each user/password gets a different salt (random string, at least 32 bits)
+- Salt should be random (use secure random source)
+- Salts stored in plaintext along with the hashed + salted password
+- Makes rainbow tables useless as each password needs individual computation
+Exercise 09
+Exercise 1 - Rating Vulnerabilities
+Comparison of Risk Management and Vulnerability Assessment:
+Aspect: Timing
+Risk Management: Starts in early development phases (e.g., during design)
+Vulnerability Assessment: Only applicable for existing systems
+────────────────────────────────────────
+Aspect: Focus
+Risk Management: Based on potential threats to the system
+Vulnerability Assessment: Applied to concrete vulnerabilities and (ideally) corresponding
+exploits
+────────────────────────────────────────
+Aspect: Goal
+Risk Management: Prevent (important) vulnerabilities before they occur
+Vulnerability Assessment: Fix and prevent further (important) vulnerabilities
+────────────────────────────────────────
+Aspect: Approach
+Risk Management: Proactive - anticipates what could go wrong
+Vulnerability Assessment: Reactive - addresses what has gone wrong
+────────────────────────────────────────
+Aspect: Scope
+Risk Management: Theoretical risk scenarios
+Vulnerability Assessment: Actual discovered vulnerabilities
+Key Insight: If risk management is used and updated throughout the software lifecycle, it
+can also support vulnerability assessment by providing context about which vulnerabilities
+are most critical for the specific system.
+---
+b) Explanation of metrics for each group:
+BASE METRICS:
+Exploitability Metrics:
+- Attack Vector (AV): Entry point for exploitation
+- Physical (P): Requires physical access
+- Local (L): Local access only
+- Adjacent (A): Adjacent network (e.g., Wi-Fi, local subnet)
+- Network (N): Fully remotely exploitable
+- Attack Complexity (AC): Difficulty of exploitation
+- Low (L): No specialized conditions, repeatable success
+- High (H): Requires specialized access conditions (e.g., race conditions, specific
+knowledge)
+- Privileges Required (PR): Level of privileges needed
+- None (N): No authorization needed
+- Low (L): Basic user capabilities
+- High (H): Significant control (e.g., administrative)
+- User Interaction (UI): Whether a user besides the attacker must participate
+- None (N): Can be exploited without user interaction
+- Required (R): Requires user action
+Impact Metrics:
+- Confidentiality Impact (C): Effect on data confidentiality
+- None (N), Low (L), High (H)
+- Integrity Impact (I): Effect on data integrity
+- None (N), Low (L), High (H)
+- Availability Impact (A): Effect on system availability
+- None (N), Low (L), High (H)
+Scope:
+- Scope (S): Whether the vulnerability impacts resources beyond its privileges
+- Unchanged (U): Vulnerable and impacted components are the same
+- Changed (C): Vulnerability affects resources beyond its authority
+TEMPORAL METRICS:
+- Exploit Code Maturity (E): Availability of public exploits
+- Unproven (U): Theoretical only
+- Proof-of-Concept (POC): PoC exists
+- Functional (F): Functional exploit available
+- High (H): Widely disseminated
+- Not Defined (X): Skip this metric
+- Remediation Level (RL): Status of fixes
+- Official Fix (O): Vendor patch available
+- Temporary Fix (TF): Temporary solution available
+- Workaround (W): Unofficial patches or config changes
+- Unavailable (U): No fix yet
+- Not Defined (X)
+- Report Confidence (RC): Confidence in vulnerability existence
+- Unconfirmed (U): Conflicting reports
+- Reasonable (R): Significant details published
+- Confirmed (C): Confirmed by source
+- Not Defined (ND)
+ENVIRONMENTAL METRICS:
+- Modified Base Metrics: All base metrics can be recalculated based on environmental
+factors
+specific to your deployment
+- Security Requirements: Importance of CIA properties for your organization
+- Confidentiality Requirement (CR)
+- Integrity Requirement (IR)
+- Availability Requirement (AR)
+- Each can be: Low (L), Medium (M), High (H), or Not Defined (X)
+c) Example Attack Scenario and CVSS Calculation:
+Scenario: SQL Injection vulnerability in a public-facing web application's login form that
+allows
+unauthenticated attackers to dump the entire user database.
+Base Metrics:
+- Attack Vector (AV): Network (N) - Exploitable over the internet
+- Attack Complexity (AC): Low (L) - Simple SQL injection, no special conditions
+- Privileges Required (PR): None (N) - No authentication needed
+- User Interaction (UI): None (N) - Direct exploitation
+- Scope (S): Unchanged (U) - Affects the web application database
+- Confidentiality (C): High (H) - All user data exposed
+- Integrity (I): High (H) - Attacker can modify database
+- Availability (A): High (H) - Could drop tables or crash database
+Calculator: https://www.first.org/cvss/calculator/3.1
+Vector String: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H
+Expected Base Score: 9.8 (Critical)
+Exercise 3 - Vulnerability of the Day: Cache Poisoning
+Example: Web Cache Deception Attack (2017)
+What Happened:
+Web Cache Deception is a cache poisoning technique discovered by security researcher
+Omer Gil in
+2017. Unlike traditional cache poisoning that targets DNS or ARP caches, this attack
+targets web
+caches (CDNs, proxies) to trick them into caching sensitive, user-specific data.
+How It Happened:
+1. Attack Mechanism:
+- Attacker sends a victim a crafted URL like:
+https://example.com/account.php/nonexistent.css
+- The web server ignores the non-existent path and returns the actual account page (due
+to path
+confusion)
+- The caching layer sees the .css extension and caches the response as a static resource
+- The victim's sensitive account information is now cached and publicly accessible
+2. Real-World Example - PayPal:
+- Researchers demonstrated this on PayPal's website
+- An attacker could trick victims into clicking malicious links
+- The cache would store personal information that could be accessed by anyone
+requesting the
+same URL
+How It Was Dealt With:
+1. Immediate Fixes:
+- Properly configure cache rules to never cache authenticated content
+- Implement strict path validation
+- Use cache-control headers correctly: Cache-Control: no-store, private
+2. Long-term Mitigations:
+- Normalize URLs before processing
+- Configure web servers to return 404 for non-existent paths rather than defaulting to
+existing
+pages
+- Implement proper caching policies that consider authentication status
+- Use security headers like Vary: Cookie to prevent caching of user-specific content
+CIA Properties Affected:
+- Confidentiality: HIGH - Primary impact. Sensitive user data (account details, personal
+information) is exposed to unauthorized parties through the cache.
+- Integrity: LOW to MEDIUM - While the cached content itself isn't modified, the incorrect
+caching behavior represents a violation of the intended system behavior. An attacker
+could potentially poison the cache with malicious content in more sophisticated variants.
+- Availability: LOW - Generally not affected, though excessive cache poisoning could
+potentially degrade performance or fill cache storage.
+CVE Reference: While not assigned a specific CVE for the technique itself, similar web
+cache poisoning vulnerabilities have been documented in various systems (e.g., CVE-2019-
+11556 for specific implementations).
+---
+Exercise 10
+Ex. 1 - Code Testing Fundamentals
+a) Blackbox, Greybox, and Whitebox Testing
+Blackbox Testing: Tests the system without any knowledge of its internal structure. Only
+inputs and outputs are observed, treating the system as a "black box."
+Greybox Testing: Combines elements of both approaches by using partial internal
+information. In security testing, this typically means using instrumentation feedback during
+testing to guide the process.
+Whitebox Testing: Has full access to the source code and internal structure of the system,
+allowing analysis of implementation details.
+Additional information in greybox: Greybox testing uses instrumentation feedback such
+as:
+- Code coverage information (which lines/branches were executed)
+- Execution paths taken
+- Runtime behavior information
+This feedback helps guide the fuzzer to generate inputs that explore new code paths.
+b) Three Types of Code Coverage Metrics
+1. Line/Statement Coverage: Measures which lines of code were executed during testing
+2. Branch Coverage: Tracks which decision paths (if/else branches) were taken
+3. Function Coverage: Records which functions were called
+Why useful for security testing:
+- Higher coverage means more code has been explored for potential vulnerabilities
+- Reveals blind spots where code hasn't been tested
+- Provides objective metrics to measure progress
+- Helps ensure thorough security analysis rather than ad-hoc testing
+c) Instrumentation in Dynamic Analysis
+Instrumentation is the process of modifying software by injecting markers/tracking code
+so that
+executed.
+analysis can be performed on it. It allows the fuzzer to observe what code paths are
+Example:
+// Original Code
+public ImageFormat detectFormat(byte[] input) {
+if (input[0] == 0x89 && input[1] == 0x50) {
+return ImageFormat.PNG;
+}
+return ImageFormat.UNKNOWN;
+}
+// Instrumented Code
+public ImageFormat detectFormat(byte[] input) {
+__coverage[0]++; // ← track function entry
+if (input[0] == 0x89 && input[1] == 0x50) {
+__coverage[1]++; // ← track branch taken
+return ImageFormat.PNG;
+}
+__coverage[2]++; // ← track alternative branch
+return ImageFormat.UNKNOWN;
+}
+The added counters track which code paths are executed, providing feedback to the
+fuzzer.
+d) Three Bug Detection Mechanisms
+1. Assertion Violations: Tests check custom invariants or use assert() statements. When
+these
+fail, a bug is detected.
+2. Differential Testing: Compare outputs across different implementations. If two parsers
+disagree on whether input is valid or produce different results, it indicates a bug.
+3. Grammar-Based Oracles: Detect injection attacks by intercepting sink operations (e.g.,
+database queries), parsing the statement, and checking if the syntax is corrupted—
+indicating
+injected data.
+Explaining Grammar-Based Oracles:
+- Every database query is intercepted before execution
+- The statement is parsed to verify correct syntax
+- If syntax is wrong, it means user input was injected and changed the query structure
+- This avoids the false positive/negative problems of maintaining sanitizer allowlists
+- If the statement is correct, the oracle can provide hints on how to break it to guide fuzzing
+---
+Ex. 3 - Vulnerability of the Day (Compression Bombs)
+a) What is a Compression Bomb?
+A compression bomb (also called a zip bomb or decompression bomb) is a malicious file
+that
+exploits compression algorithms by creating a small compressed file that expands to an
+enormous
+size when decompressed, leading to Denial of Service by exhausting RAM or disk space.
+Why compression algorithms are susceptible:
+- Compression algorithms work by finding and encoding statistical redundancy
+- They represent repeated patterns using minimal bits
+- Highly redundant data (like millions of zeros) compresses extremely well
+- Attackers can craft files with extreme compression ratios
+Famous Example - 42.zip:
+- Compressed size: 42 kilobytes
+- Contains 5 layers of nested zip files in sets of 16
+- Each bottom layer contains a 4.3 GB file
+- Total uncompressed size: 4.5 Petabytes
+- Compression factor: ≈ 10^7
+CWE Identifier: CWE-409: Improper Handling of Highly Compressed Data (Data
+Amplification)
+b) Three Contexts Where Compression Bombs Are a Threat
+1. Image Files: PNG, JPEG, GIF parsers (e.g., libpng vulnerabilities)
+2. Office Documents: .docx, .xlsx files are actually ZIP archives containing XML files
+3. XML Processing: XML bombs that use entity expansion to create massive documents
+4. HTTP Communication: Web servers often compress responses with gzip/deflate
+5. Version Control: Git bombs that exploit Git's compression (see https://kate.io/blog/git-
+bomb/)
+c) Would Jazzer Find Such Issues?
+Partially, with limitations:
+Jazzer COULD detect compression bombs if:
+1. Timeout Detection: If decompression takes too long, Jazzer's timeout mechanism
+would catch it
+2. Explicit Assertions: If the fuzz test includes assertions checking decompressed size
+limits:
+assertTrue(decompressedSize < MAX_SIZE, "Decompression bomb detected");
+3. Memory Sanitizers: If memory exhaustion triggers a crash or exception that Jazzer
+catches
+4. Exception Handling: If the decompression library throws OutOfMemoryError
+Jazzer might MISS compression bombs if:
+- They cause gradual resource exhaustion without triggering exceptions
+- No size limits or assertions are implemented in the fuzz test
+- The test environment has sufficient resources to handle the decompression without
+crashing
+Best Practice: To reliably detect compression bombs with Jazzer, implement proper test
+harnesses
+that:
+- Track bytes decompressed and enforce limits
+- Set reasonable timeouts
+- Monitor memory usage
+- Use assertions to validate output size is reasonable relative to input size
+This aligns with the mitigation strategies mentioned in the lecture:
+- Keep track of decompressed byte count
+- Limit decompression rounds
+- Use "distrustful decomposition" by limiting resources for the decompression process

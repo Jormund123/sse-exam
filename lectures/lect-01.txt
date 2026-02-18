@@ -1,0 +1,288 @@
+Secure Software Engineering
+Winterterm 2025/26
+Recap
+Dr. Christian Tiefenau
+1
+Lecture evaluation
+2
+https://fha8.de/eX4kP
+1
+st Exam
+3
+1
+st Exam
+• eKlausur (on a laptop that the University provides you)
+• 18.02.2026
+• Location: ULB, Adenauer Allee 39-41, Bonn
+• Start: 09:00 & 10:45
+• Please be there 15 minutes early (08:45 & 10:30)
+• You have to use your eCampus Login (uni-bonn) credentials
+• Please ensure that you can successfully login to eCampus before the exam
+• 90 Minutes
+• 5-7 Topics
+• Single Statements and Lecture topics
+4
+Note
+• As of today: 170 126 participants
+• But only 90 seats
+• 2 exams on the same day
+• Information on Monday per email
+5
+2
+nd Exam
+• eKlausur (on a laptop that the University provides you)
+• 23.03.2026
+• Location: ULB, Adenauer Allee 39-41, Bonn
+• Start: 11:00
+• Please be there 15 minutes early (10:45)
+• You have to use your eCampus Login (uni-bonn) credentials
+• Please ensure that you can successfully login to eCampus before the exam
+• 90 Minutes
+• 5-7 Topics
+• Single Statements and Lecture topics
+6
+Recap
+7
+Lecture Outline
+8
+Requirements
+and Use Cases
+Architecture
+And Design Test Plans Code Test and
+Test Results
+Feedback from
+the Field
+Abuse Cases + Sec.
+Requirements:
+On requirements and use
+cases; get into the mind of
+the attackers
+Risk-Analysis (STRIDE):
+On design & specification
+uncover and rank
+architectural flaws
+Code-Review (+tools):
+On code; identify
+implementation bugs
+Penetration Testing:
+On system in real environment;
+reveal issues in env.
+Risk-Based Sec. Tests:
+On units and system;
+Test security functionality &
+test abuse cases and riskanalysis results
+Basic definitions
+9
+• An asset is any tangible or intangible thing or characteristic that has value
+to an organization [ISO/IEC 27000:2014].
+• An attack vector is a path or means by which an attacker can gain access to a
+computer or network server in order to deliver a malicious outcome [ISO
+27032:2012].
+• A vulnerability is a weakness of an asset (or control) that can be exploited by
+one or more threats [ISO/IEC 27000:2016].
+• An exploit is a method that identifies and takes advantage of a vulnerability in
+an asset [Younis and Malaiya 2015].
+• An attack is an attempt to destroy, expose, alter, disable, steal or gain
+unauthorized access to or make unauthorized use of an asset [ISO
+27000:2016].
+Terms & Relations (1)
+10
+Asset
+(e.g., component or data)
+threatens safeguards
+mitigates
+Countermeasure
+(or Security Control) Threat
+Vulnerability
+of
+Attack
+targets
+derived
+from
+exploits
+Terms & Relations (2)
+11
+Security Property
+(or Security Objective)
+Threat Countermeasure
+(or Security Control)
+Asset
+(e.g., component or data)
+violates contributes to
+threatens safeguards
+mitigates
+Basic definitions
+12
+• Confidentiality is the property that information is not made available or disclosed to
+unauthorized individuals, entities, or processes [ISO/IEC 27000:2016].
+• Integrity is the property of safeguarding the accuracy and completeness of assets
+[ISO/IEC 27000:2016].
+• Availability is the property of being accessible
+and usable upon demand by an authorized
+entity [ISO/IEC 27000:2016].
+Misuse & Abuse Cases
+• Difference misuse vs. abuse
+• What are they good for?
+• How do they relate to threat modeling & risk assessment?
+• Be able to apply to example
+13
+System Design & Threat Modeling
+• Explain STRIDE properties and be able to understand data flow
+diagrams
+• Conduct a STRIDE per [element|interaction] analysis
+• Define, name, and discuss trust boundaries
+• What is distrustful decomposition?
+• What are its benefits, what its challenges?
+• Be able to apply distrustful decomposition to a model
+• To what extent does platform XYZ support distrustful decomposition
+(or not)?
+14
+Risk Assessment & Test Planning
+• Definition of risk
+• Factors that impact risk; relation to assets
+• When is risk assessment best applied?
+• How does risk assessment aid in test planning? How does it aid vuln.
+assessment?
+• Protection poker: What is it? How does it work? Be able to “play”
+15
+Defensive Coding
+• What is defensive coding? Principles? Complexity? Attack Surface?
+• What is sanitization? What types exist? What are possible pitfalls?
+• In Java, why is cloning insecure?
+• Why is deserialization a security risk?
+• Etc. etc.
+16
+Defensive Coding - Overview of Principles
+• Input
+• Validation
+• Sanitization
+• Exception Handling
+• Class Inheritance / Immutability / Cloning
+• Concurrency
+• Native Wrappers
+• Global variables
+• Serialization
+• Unencrypted Storage
+• Removal of unused sensitive data
+• Character Conversions
+• HTTP specs
+• Config files
+Code Inspection
+• Process of manual code review
+• Clean Code
+• Test Driven Development
+18
+Correct usage of security mechanisms
+• Security Code vs. Secure Code
+• Code that implements security features vs. All code avoiding the introduction of
+vulnerabilities
+• Sanitizers
+• Make untrusted (!) input safe for our context
+• Don’t roll your own
+• JWT
+• Used for Authentication + session management
+• But things can be missed:
+• Trust of token contents without verification
+• No signature validation
+• Security Mechanisms must be…
+• Configured correctly
+• Used as intended
+• Understood!
+19
+Applied Cryptography
+• Encryption vs. Hashing vs. MAC vs. Signature
+• Symmetric vs. asymmetric encryption; mixed-mode encryption
+• Authentication with hashes (Passwords)
+• What is a rainbow table? What is brute force? How to protect against
+it?
+20
+Technique Goal
+Encrpytion Confidentiality Protects from unauth. reading
+Hashing Integrity One-way, same input -> same output
+MACs Integrity, Authenticity Protects against manipulation
+Signature Integrity, Authenticity, Non-repudiation same
+Code Analysis – Static Analysis
+• Whitebox vs Blackbox
+• Taint Analysis
+• Sources / Sinks / Sanitizers / Propagators
+• Code Graph Representations (CPG, CFG, PDG, AST)
+• Limitations
+• Trade-Offs (Over vs Under approximation)
+• Why do we need CFGs? What is a CPG? What is a Sink?
+• How does it help to find injections, buffer overflows, etc.
+21
+Code Analysis – Dynamic Analysis
+• Input Generation
+• Fuzzing (randomness + mutations)
+• Structured based on past experience (heuristics + border checks)
+• Bug detection
+• Observe crashes
+• Error messages
+• Responses
+• Limitations
+• How to detect an injection?
+• How to know when to end?
+22
+Code Analysis – Greybox Analysis
+• Smarter Input Generation
+• Fuzzing (randomness + mutations)
+• Structured based on past experience (heuristics + border checks)
+• Usage of instrumentation feedback
+• Bug detection
+• Use instrumentation for bug detection
+• Understanding the idea of ASan or Jazzer’s bug detection
+• Limitations
+• How to detect an injection?
+• How to know when to end?
+23
+Vulnerability Assessment
+• In CVSS, what are Base vs. Temporal vs. Environment metrics?
+• Technical characteristics vs. threat over time vs. context
+• Who defines which parts of a CVSS score?
+• Name different metrics and their (not absolute ☺) impact on the
+score
+• What are limits of CVSS?
+• Apply scoring to an example
+24
+A web-based document management system is used internally by a company.
+The application is accessible over HTTPS from the company network but not directly from the public internet.
+A vulnerability was discovered in the file upload component.
+An authenticated user with standard user privileges can upload a specially crafted file that triggers a command
+injection on the application server.
+Exploiting the vulnerability:
+•Does not require user interaction beyond the attacker
+•Requires no special conditions
+•Allows execution of arbitrary operating system commands
+•Affects only the application server itself
+•Can lead to:
+• Reading sensitive configuration files
+• Modifying application data ……..
+
+VOTDs
+28
+SQL
+Injection
+OS
+Command
+Injection
+XSS
+XSRF
+Log overflow
+Path
+traversal
+Hardcoded
+credentials
+Hashing
+without salt
+Cache
+Poisoning
+Uncontrolled
+format string
+Best preparation
+29
+• Previous exams: uggcf://nygxynhfhera.snpufpunsg.vasb/
+• Exercise sheets + summary
+Much success in the upcoming exam!
+30
+Bye for now, see you soon!
+31
